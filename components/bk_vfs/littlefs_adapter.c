@@ -3,7 +3,7 @@
 #include "os/mem.h"
 #include <common/bk_include.h>
 
-#if CONFIG_LITTLEFS
+// #if CONFIG_LITTLEFS
 
 #include <fcntl.h>
 
@@ -685,14 +685,16 @@ static struct bk_file_ops g_lfs_file_ops = {
 };
 
 int bk_lfs_init(void) {
+	os_printf("bk_lfs_init\r\n");
 	return bk_register_filesystem(FS_LITTLEFS, &g_lfs_fs_ops, &g_lfs_file_ops);
 }
 
 
-#else
+// #else
 
-int bk_lfs_init(void) {
-	return 0;
-}
+// int bk_lfs_init(void) {
+// 	os_printf("LITTLEFS not enabled\r\n");
+// 	return 0;
+// }
 
-#endif
+// #endif

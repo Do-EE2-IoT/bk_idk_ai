@@ -1,7 +1,7 @@
 menu "Littlefs"
 	config LITTLEFS
 		bool "Enable Littlefs"
-		default n
+		default y
 
 	choice LITTLEFS_PARTITION
 		depends on LITTLEFS

@@ -6,27 +6,27 @@
 #endif
 
 
-#if (CONFIG_FATFS)
-static int _fs_mount(void)
-{
-    struct bk_fatfs_partition partition;
-    char *fs_name = NULL;
-    int ret;
+// #if (CONFIG_FATFS)
+// static int _fs_mount(void)
+// {
+//     struct bk_fatfs_partition partition;
+//     char *fs_name = NULL;
+//     int ret;
 
-    fs_name = "fatfs";
-    partition.part_type = FATFS_DEVICE;
-#if (CONFIG_SDCARD)
-    partition.part_dev.device_name = FATFS_DEV_SDCARD;
-#else
-    partition.part_dev.device_name = FATFS_DEV_FLASH;
-#endif
-    partition.mount_path = "/";
+//     fs_name = "fatfs";
+//     partition.part_type = FATFS_DEVICE;
+// #if (CONFIG_SDCARD)
+//     partition.part_dev.device_name = FATFS_DEV_SDCARD;
+// #else
+//     partition.part_dev.device_name = FATFS_DEV_FLASH;
+// #endif
+//     partition.mount_path = "/";
 
-    ret = mount("SOURCE_NONE", partition.mount_path, fs_name, 0, &partition);
+//     ret = mount("SOURCE_NONE", partition.mount_path, fs_name, 0, &partition);
 
-    return ret;
-}
-#endif
+//     return ret;
+// }
+// #endif
 
 #if (CONFIG_LITTLEFS)
 static int _fs_mount(void)

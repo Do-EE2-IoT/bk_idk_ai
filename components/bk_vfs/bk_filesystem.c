@@ -101,18 +101,23 @@ int bk_vfs_mount(const char *source, const char *target,
 	int ret;
 
 	ret = bk_vfs_init();
+	os_printf("bk_vfs_mount target:%s, fs_type:%s\r\n", target, fs_type);
 	if (ret)
 		return -1;
 
+	
+
 	impl = bk_find_filesystem_impl(fs_type);
+	os_printf("bk_vfs_mount impl:%p\r\n", impl);
 	if (!impl) {
 		return -1;
 	}
-
+    os_printf("bk_vfs_mount impl->fs_ops:%p\r\n", impl->fs_ops);
 	if (!impl->fs_ops->mount) {
 		return -1;
 	}
 	bk_vfs_lock();
+	os_printf("bk_vfs_mount check repeat mount\r\n");
 	ret = bk_vfs_check_repeat_mount(target, fs_type, impl, data);
 	if (ret == VFS_REPEAT_MOUNT) {
 		BK_LOGI("vfs", "fs extra count +1\r\n");
@@ -128,6 +133,7 @@ int bk_vfs_mount(const char *source, const char *target,
 	}
 
 	if (!fs) {
+		os_printf("bk_vfs_mount no free fs slot\r\n");
 		bk_vfs_unlock();
 		return -1;
 	}
@@ -141,6 +147,7 @@ int bk_vfs_mount(const char *source, const char *target,
 		os_free(fs->mount_point);
 		fs->mount_point = NULL;
 		bk_vfs_unlock();
+		os_printf("bk_vfs_mount fs mount failed\r\n");
 		return -1;
 	} else {
 		bk_vfs_unlock();

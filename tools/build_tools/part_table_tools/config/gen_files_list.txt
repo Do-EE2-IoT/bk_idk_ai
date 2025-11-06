@@ -1,0 +1,1 @@
+/armino/bk_avdk/bk_idk/tools/env_tools/beken_packager/partition_bk7256_ota_a_new.json
