@@ -2,7 +2,7 @@ menu "modules::uart_debug"
 	config UART_DEBUG
 		depends on UART_ATE_PORT
 		bool "Enable Uart Debug"
-		default n
+		default y
 
 	config ATE
 		bool "Enable ATE"
