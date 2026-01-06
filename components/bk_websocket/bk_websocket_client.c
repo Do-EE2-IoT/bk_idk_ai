@@ -913,7 +913,7 @@ static int ws_connect(transport client, const char *host, int port, int timeout_
 		ws->buffer[header_len] = '\0';
 		BK_LOGE(TAG, "Read header chunk %d, current header size: %d\r\n", len, header_len);
 	} while (NULL == os_strstr(ws->buffer, "\r\n\r\n") && header_len < WS_BUFFER_SIZE);
-	os_printf("server buffer:\r\n");
+	os_printf("server buffer:   %s\r\n", ws->buffer);
 	bk_hex_dump(ws->buffer, 200);
 #if 0
 	if (header_len == WS_BUFFER_SIZE) {
@@ -992,6 +992,7 @@ static int ws_poll_connection_closed(int *sockfd, int timeout_ms)
 
 }
 
+/*
 static int ws_client_recv(transport client)
 {
 	int rlen;
@@ -1056,12 +1057,128 @@ retry:
 		BK_LOGE(TAG, "Received close frame\r\n");
 		client->state = WEBSOCKET_STATE_CLOSING;
 	} else if (client->last_opcode == WS_TRANSPORT_OPCODES_TEXT) {
-		BK_LOGE(TAG, "Received text frame[len=%d]: \r\n", client->payload_len);
+	      //BK_LOGE(TAG, "Received text frame[len=%d]: \r\n", client->payload_len);
 		//bk_hex_dump(client->rx_buffer, client->payload_len);
 	}
 
 	return BK_OK;
+} */
+
+
+static int ws_client_recv(transport client)
+{
+	int rlen;
+	client->payload_offset = 0;
+	transport_ws_t *ws = client->ws_transport;
+
+	do
+	{
+		BK_LOGD(TAG, "----------begin receive--------------\r\n");
+
+#if CONFIG_WEBSOCKET_FULL_SIZE
+		/* ---- overflow guard BEFORE read ---- */
+		if (client->payload_offset >= client->buffer_size) {
+			BK_LOGE(TAG, "payload_offset overflow before read");
+			return BK_FAIL;
+		}
+
+		rlen = ws_read(client,
+					   client->rx_buffer + client->payload_offset,
+					   client->buffer_size - client->payload_offset,
+					   WEBSOCKET_NETWORK_TIMEOUT_MS);
+#else
+		rlen = ws_read(client,
+					   client->rx_buffer,
+					   client->buffer_size,
+					   WEBSOCKET_NETWORK_TIMEOUT_MS);
+#endif
+
+		if (rlen < 0)
+		{
+			BK_LOGE(TAG, "Error read data\r\n");
+			return BK_FAIL;
+		}
+
+		client->payload_len = ws->frame_state.payload_len;
+		client->last_opcode = (ws_transport_opcodes_t)ws->frame_state.opcode;
+
+		if (rlen == 0 && client->last_opcode == WS_TRANSPORT_OPCODES_NONE)
+		{
+			BK_LOGE(TAG, "ws read timeouts\r\n");
+			return BK_OK;
+		}
+
+		/* ---- overflow guard AFTER read ---- */
+		if (client->payload_offset + rlen > client->buffer_size) {
+			BK_LOGE(TAG, "rx buffer overflow: offset=%d rlen=%d buf=%d",
+			        client->payload_offset, rlen, client->buffer_size);
+			return BK_FAIL;
+		}
+
+		client->payload_offset += rlen;
+
+#if CONFIG_WEBSOCKET_FULL_SIZE
+		if (client->payload_len >= client->buffer_size)
+		{
+			if (client->payload_offset == client->buffer_size)
+			{
+				bk_websocket_client_dispatch_event(
+					client,
+					WEBSOCKET_EVENT_DATA,
+					client->rx_buffer,
+					client->payload_offset,
+					client->last_opcode);
+
+				client->payload_offset = 0;
+			}
+		}
+#else
+		bk_websocket_client_dispatch_event(
+			client,
+			WEBSOCKET_EVENT_DATA,
+			client->rx_buffer,
+			rlen,
+			client->last_opcode);
+#endif
+
+	} while (client->payload_offset < client->payload_len);
+
+#if CONFIG_WEBSOCKET_FULL_SIZE
+	if (client->payload_len < client->buffer_size && client->payload_offset > 0)
+	{
+		bk_websocket_client_dispatch_event(
+			client,
+			WEBSOCKET_EVENT_DATA,
+			client->rx_buffer,
+			client->payload_offset,
+			client->last_opcode);
+	}
+#endif
+
+	/* ---- control frames giữ nguyên ---- */
+	if (client->last_opcode == WS_TRANSPORT_OPCODES_PING)
+	{
+		const char *data = (client->payload_len == 0) ? NULL : client->rx_buffer;
+		ws_write(client,
+				 WS_TRANSPORT_OPCODES_PONG,
+				 WS_MASK,
+				 data,
+				 client->payload_len,
+				 WEBSOCKET_NETWORK_TIMEOUT_MS);
+	}
+	else if (client->last_opcode == WS_TRANSPORT_OPCODES_PONG)
+	{
+		client->wait_for_pong_resp = false;
+		BK_LOGE(TAG, "GET PONG SUCCESS \r\n");
+	}
+	else if (client->last_opcode == WS_TRANSPORT_OPCODES_CLOSE)
+	{
+		client->state = WEBSOCKET_STATE_CLOSING;
+	}
+
+	return BK_OK;
 }
+
 
 static bk_err_t websocket_client_destroy_config(transport client)
 {

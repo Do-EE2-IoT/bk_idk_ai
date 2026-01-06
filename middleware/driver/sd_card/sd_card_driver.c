@@ -287,7 +287,7 @@ static bk_err_t sd_card_cmd_send_if_cond(void)
 	rsp_arg = bk_sdio_host_get_cmd_rsp_argument(SDIO_HOST_RSP0);
 	check_pattern = rsp_arg & 0xff;
 	voltage_accpet = (rsp_arg >> 8) & 0xf;
-
+        SD_CARD_LOGW("check_pattern: %02x && voltage_accpet %02x\r\n", check_pattern, voltage_accpet);
 	if (check_pattern == 0xaa && voltage_accpet == 0x1) {
 		SD_CARD_LOGI("sd card support voltage 2.7-3.6 V\r\n");
 		return BK_OK;

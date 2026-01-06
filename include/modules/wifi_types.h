@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <common/bk_err.h>
 #include <common/bk_include.h>
-
+#include "bk_wifi_adapter.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
