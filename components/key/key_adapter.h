@@ -18,6 +18,7 @@ extern "C" {
 #define KEY_GPIO_13   GPIO_13
 #define KEY_GPIO_12   GPIO_12
 #define KEY_GPIO_8    GPIO_8
+#define KEY_GPIO_26   GPIO_26
 
 #define LONG_RRESS_TIMR 3000  //long press wake up time
 
@@ -32,7 +33,8 @@ typedef enum {
     BRIGHTNESS_ADD,
     AI_AGENT_CONFIG,
     FACTORY_RESET,
-    AUDIO_BUF_APPEND
+    AUDIO_BUF_APPEND,
+    WAKEUP
 } key_event_t;
 
 typedef enum{
