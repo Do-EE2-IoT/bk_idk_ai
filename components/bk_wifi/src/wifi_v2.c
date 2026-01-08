@@ -2110,8 +2110,8 @@ bk_err_t bk_wifi_sta_start(void)
 	// enable softap's channel to follow STA's channel
 	wifi_sta_init_callback();
 
-// 	os_printf("wifi_sta get global config \r\n");
-// 	wifi_sta_get_global_config(&sta_config);
+	os_printf("wifi_sta get global config \r\n");
+	wifi_sta_get_global_config(&sta_config);
 	
 
 // #ifdef CONFIG_CONNECT_THROUGH_PSK_OR_SAE_PASSWORD
@@ -2194,11 +2194,11 @@ bk_err_t bk_wifi_sta_start(void)
 // 		}
 // 	}
 
-// 	if (wifi_sta_is_started())
-// 	{
-// 		WIFI_LOGW("sta already started, ignored!\n");
-// 		return BK_OK;
-// 	}
+	if (wifi_sta_is_started())
+	{
+		WIFI_LOGW("sta already started, ignored!\n");
+		return BK_OK;
+	}
 
 // #if CONFIG_STA_AUTO_RECONNECT
 // 	/*
@@ -2212,12 +2212,12 @@ bk_err_t bk_wifi_sta_start(void)
 // 	wpa_ctrl_request(WPA_CTRL_CMD_WPAS_SET, (void *)false);
 // #endif
 
-// 	wifi_sta_init_rw_driver();
-// 	if (wifi_supplicant_start())
-// 	{
-// 		WIFI_LOGI("%s wifi enable fail\n");
-// 		return BK_OK;
-// 	}
+wifi_sta_init_rw_driver();
+	if (wifi_supplicant_start())
+	{
+		WIFI_LOGE("%s wifi enable fail\n");
+		return BK_OK;
+	}
 
 // #if CONFIG_STA_VSIE
 // 	if (bk_feature_sta_vsie_enable())
@@ -2242,15 +2242,15 @@ bk_err_t bk_wifi_sta_start(void)
 // 	}
 // 	// #endif
 
-// 	/* set network parameters: ssid, passphase */
-// 	wlan_sta_set((uint8_t *)sta_config.ssid, os_strlen(sta_config.ssid), (uint8_t *)sta_config.password);
+	/* set network parameters: ssid, passphase */
+	wlan_sta_set((uint8_t *)sta_config.ssid, os_strlen(sta_config.ssid), (uint8_t *)sta_config.password);
 
-// 	/*
-// 	 * let wpa_psk_cal thread to caculate psk.
-// 	 * XXX: If you know psk value, fill last two parameters of `wpa_psk_request()'.
-// 	 */
-// 	wpa_psk_request(g_sta_param_ptr->ssid.array, g_sta_param_ptr->ssid.length,
-// 					(char *)g_sta_param_ptr->key, psk, psk_len);
+	/*
+	 * let wpa_psk_cal thread to caculate psk.
+	 * XXX: If you know psk value, fill last two parameters of `wpa_psk_request()'.
+	 */
+	wpa_psk_request(g_sta_param_ptr->ssid.array, g_sta_param_ptr->ssid.length,
+					(char *)g_sta_param_ptr->key, psk, psk_len);
 
 // #if CONFIG_STA_AUTO_RECONNECT
 // 	/* set auto reconnect parameters */
@@ -2260,12 +2260,12 @@ bk_err_t bk_wifi_sta_start(void)
 // 	wlan_sta_set_autoreconnect(&ar);
 // #endif
 
-// 	wifi_set_state_bit(WIFI_STA_STARTED_BIT);
-// 	WIFI_LOGD("sta started(%x)\n", s_wifi_state_bits);
+	wifi_set_state_bit(WIFI_STA_STARTED_BIT);
+	WIFI_LOGD("sta started(%x)\n", s_wifi_state_bits);
 
-// 	/* always connect the AP automatically */
-// 	bk_wifi_sta_connect();
-// 	os_printf("Station connect now\r\n");
+	/* always connect the AP automatically */
+	bk_wifi_sta_connect();
+	os_printf("Station connect now\r\n");
 
 	return BK_OK;
 }
