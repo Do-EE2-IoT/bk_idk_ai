@@ -34,11 +34,11 @@
 #include "cm_backtrace.h"
 #endif
 
-#define MAX_DUMP_SYS_MEM_COUNT       (8)
-#define SOC_DTCM_DATA_SIZE           (0x4000)
-#define SOC_ITCM_DATA_SIZE           (0x4000)
-#define SOC_SRAM_TOTAL_SIZE          (0xA0000)
-#define SOC_SRAM_DATA_END            (SOC_SRAM0_DATA_BASE + SOC_SRAM_TOTAL_SIZE)
+#define MAX_DUMP_SYS_MEM_COUNT (8)
+#define SOC_DTCM_DATA_SIZE (0x4000)
+#define SOC_ITCM_DATA_SIZE (0x4000)
+#define SOC_SRAM_TOTAL_SIZE (0xA0000)
+#define SOC_SRAM_DATA_END (SOC_SRAM0_DATA_BASE + SOC_SRAM_TOTAL_SIZE)
 
 #if (CONFIG_SOC_BK7236_SMP_TEMP || CONFIG_SOC_BK7239_SMP_TEMP || CONFIG_SOC_BK7286_SMP_TEMP)
 extern unsigned char __itcm_cpu0_end__;
@@ -46,7 +46,7 @@ extern unsigned char __dtcm_cpu0_start__;
 extern unsigned char _estack_cpu0;
 extern unsigned char _sstack_cpu0;
 
-#define __dtcm_end__  __itcm_cpu0_end__
+#define __dtcm_end__ __itcm_cpu0_end__
 #define __dtcm_start__ __dtcm_cpu0_start__
 #define _estack _estack_cpu0
 #define _sstack _sstack_cpu0
@@ -66,13 +66,13 @@ static hook_func s_ble_dump_func = NULL;
 
 volatile unsigned int g_enter_exception = 0;
 
-
-static void rtos_dump_plat_memory(void) {
+static void rtos_dump_plat_memory(void)
+{
     // Dump DTCM
     stack_mem_dump((uint32_t)SOC_DTCM_DATA_BASE, (uint32_t)(SOC_DTCM_DATA_BASE + SOC_DTCM_DATA_SIZE));
 
     // Dump ITCM
-    stack_mem_dump((uint32_t)(SOC_ITCM_DATA_BASE + 0x20) , (uint32_t)(SOC_ITCM_DATA_BASE + SOC_ITCM_DATA_SIZE));
+    stack_mem_dump((uint32_t)(SOC_ITCM_DATA_BASE + 0x20), (uint32_t)(SOC_ITCM_DATA_BASE + SOC_ITCM_DATA_SIZE));
 
     // Dump All SRAM
     stack_mem_dump((uint32_t)SOC_SRAM3_DATA_BASE, (uint32_t)SOC_SRAM4_DATA_BASE);
@@ -83,45 +83,46 @@ static void rtos_dump_plat_memory(void) {
     stack_mem_dump((uint32_t)SOC_SRAM2_DATA_BASE, (uint32_t)SOC_SRAM3_DATA_BASE);
 }
 
-static void dump_peri_regs(void) {
+static void dump_peri_regs(void)
+{
 #if CONFIG_SOC_BK7236XX
-    stack_mem_dump((uint32_t)SOC_SYS_REG_BASE, (uint32_t)SOC_SYS_REG_BASE + (0x5c*4));
-    stack_mem_dump((uint32_t)SOC_FLASH_REG_BASE, (uint32_t)SOC_FLASH_REG_BASE + (0x20*4));
-    stack_mem_dump((uint32_t)SOC_AON_PMU_REG_BASE, (uint32_t)SOC_AON_PMU_REG_BASE + (0x7f*4));
+    stack_mem_dump((uint32_t)SOC_SYS_REG_BASE, (uint32_t)SOC_SYS_REG_BASE + (0x5c * 4));
+    stack_mem_dump((uint32_t)SOC_FLASH_REG_BASE, (uint32_t)SOC_FLASH_REG_BASE + (0x20 * 4));
+    stack_mem_dump((uint32_t)SOC_AON_PMU_REG_BASE, (uint32_t)SOC_AON_PMU_REG_BASE + (0x7f * 4));
 #if (GEN_SECURITY_DEV_UART1_IS_SECURE && !CONFIG_SPE) // if UART1 is used for TFM debug, NSPE cannot access gpio0/1 reg
-    stack_mem_dump((uint32_t)SOC_AON_GPIO_REG_BASE+ (0x2*4), (uint32_t)SOC_AON_GPIO_REG_BASE + (0x30*4));
+    stack_mem_dump((uint32_t)SOC_AON_GPIO_REG_BASE + (0x2 * 4), (uint32_t)SOC_AON_GPIO_REG_BASE + (0x30 * 4));
 #else
-    stack_mem_dump((uint32_t)SOC_AON_GPIO_REG_BASE, (uint32_t)SOC_AON_GPIO_REG_BASE + (0x30*4));
+    stack_mem_dump((uint32_t)SOC_AON_GPIO_REG_BASE, (uint32_t)SOC_AON_GPIO_REG_BASE + (0x30 * 4));
 #endif
 
 #if CONFIG_GENERAL_DMA
-    stack_mem_dump((uint32_t)SOC_GENER_DMA_REG_BASE, (uint32_t)SOC_GENER_DMA_REG_BASE + (0x44*4));
+    stack_mem_dump((uint32_t)SOC_GENER_DMA_REG_BASE, (uint32_t)SOC_GENER_DMA_REG_BASE + (0x44 * 4));
 #if (SOC_DMA_UNIT_NUM > 1)
-    stack_mem_dump((uint32_t)SOC_GENER_DMA1_REG_BASE, (uint32_t)SOC_GENER_DMA1_REG_BASE + (0x44*4));
+    stack_mem_dump((uint32_t)SOC_GENER_DMA1_REG_BASE, (uint32_t)SOC_GENER_DMA1_REG_BASE + (0x44 * 4));
 #endif
 #endif
 #if CONFIG_MAILBOX
-    stack_mem_dump((uint32_t)SOC_MBOX0_REG_BASE, (uint32_t)SOC_MBOX0_REG_BASE + (0x38*4));
-    stack_mem_dump((uint32_t)SOC_MBOX1_REG_BASE, (uint32_t)SOC_MBOX1_REG_BASE + (0x38*4));
+    stack_mem_dump((uint32_t)SOC_MBOX0_REG_BASE, (uint32_t)SOC_MBOX0_REG_BASE + (0x38 * 4));
+    stack_mem_dump((uint32_t)SOC_MBOX1_REG_BASE, (uint32_t)SOC_MBOX1_REG_BASE + (0x38 * 4));
 #endif
 #if CONFIG_AON_RTC
-    stack_mem_dump((uint32_t)SOC_AON_RTC_REG_BASE, (uint32_t)SOC_AON_RTC_REG_BASE + (0x0a*4));
+    stack_mem_dump((uint32_t)SOC_AON_RTC_REG_BASE, (uint32_t)SOC_AON_RTC_REG_BASE + (0x0a * 4));
 #endif
 #if CONFIG_PSRAM
-    stack_mem_dump((uint32_t)SOC_PSRAM_REG_BASE, (uint32_t)SOC_PSRAM_REG_BASE + (0x17*4));
+    stack_mem_dump((uint32_t)SOC_PSRAM_REG_BASE, (uint32_t)SOC_PSRAM_REG_BASE + (0x17 * 4));
     /*dmup psram memory*/
-    stack_mem_dump((uint32_t)0x60000000, (uint32_t)(0x60000000+2048));
+    stack_mem_dump((uint32_t)0x60000000, (uint32_t)(0x60000000 + 2048));
 #endif
 #endif
-
 }
 
-
-unsigned int arch_is_enter_exception(void) {
+unsigned int arch_is_enter_exception(void)
+{
     return g_enter_exception;
 }
 
-void arch_set_enter_exception(void) {
+void arch_set_enter_exception(void)
+{
     g_enter_exception = 1;
 }
 
@@ -137,38 +138,44 @@ void rtos_regist_ble_dump_hook(hook_func ble_func)
 
 void rtos_regist_plat_dump_hook(uint32_t mem_base_addr, uint32_t mem_size)
 {
-    if (mem_base_addr >= SOC_SRAM0_DATA_BASE
-        && (mem_base_addr + mem_size) < SOC_SRAM_DATA_END) {
+    if (mem_base_addr >= SOC_SRAM0_DATA_BASE && (mem_base_addr + mem_size) < SOC_SRAM_DATA_END)
+    {
 #if CONFIG_SPE
-        //BK_DUMP_OUT("rtos_regist_plat_dump_hook memory(0x%x) in sram, need not dump again.\r\n", mem_base_addr);
+        // BK_DUMP_OUT("rtos_regist_plat_dump_hook memory(0x%x) in sram, need not dump again.\r\n", mem_base_addr);
 #else
-        //UART/Log is not ready yet!
+        // UART/Log is not ready yet!
 #endif
         return;
     }
 
-    for (int i = 0; i < s_mem_count; i++) {
-        if(mem_base_addr == s_dump_sys_mem_info[i].mem_base_addr
-         && mem_size == s_dump_sys_mem_info[i].mem_size) {
+    for (int i = 0; i < s_mem_count; i++)
+    {
+        if (mem_base_addr == s_dump_sys_mem_info[i].mem_base_addr && mem_size == s_dump_sys_mem_info[i].mem_size)
+        {
             BK_DUMP_OUT("rtos_regist_plat_dump_hook memory(0x%x) already register.\r\n", mem_base_addr);
             return;
-         }
+        }
     }
 
-    if (s_mem_count < MAX_DUMP_SYS_MEM_COUNT) {
+    if (s_mem_count < MAX_DUMP_SYS_MEM_COUNT)
+    {
         s_dump_sys_mem_info[s_mem_count].mem_base_addr = mem_base_addr;
         s_dump_sys_mem_info[s_mem_count].mem_size = mem_size;
         s_mem_count++;
-    } else {
+    }
+    else
+    {
         BK_DUMP_OUT("rtos_regist_plat_dump_hook failed:s_mem_count(%d).\r\n", s_mem_count);
     }
 }
 
-void rtos_dump_plat_sys_mems(void) {
+void rtos_dump_plat_sys_mems(void)
+{
 #if CONFIG_MEMDUMP_ALL
     rtos_dump_plat_memory();
 
-    for (int i = 0; i < s_mem_count; i++) {
+    for (int i = 0; i < s_mem_count; i++)
+    {
         uint32_t begin = s_dump_sys_mem_info[i].mem_base_addr;
         uint32_t end = begin + s_dump_sys_mem_info[i].mem_size;
         stack_mem_dump(begin, end);
@@ -177,7 +184,7 @@ void rtos_dump_plat_sys_mems(void) {
 }
 
 #if CONFIG_FREERTOS_SMP
-#define CPU_ID     rtos_get_core_id()
+#define CPU_ID rtos_get_core_id()
 #else
 
 #if (CONFIG_MAILBOX) && (CONFIG_CPU_CNT > 1)
@@ -185,37 +192,37 @@ void rtos_dump_plat_sys_mems(void) {
 #endif
 
 #if (CONFIG_SYS_CPU0)
-#define CPU_ID     0
+#define CPU_ID 0
 #endif
 
 #if (CONFIG_SYS_CPU1)
-#define CPU_ID     1
+#define CPU_ID 1
 #endif
 
 #if (CONFIG_SYS_CPU2)
-#define CPU_ID     2
+#define CPU_ID 2
 #endif
 
 #endif
 
-static const char * const fault_type[] =
-{
-	[0]  = NULL,
-	[1]  = NULL,
-	[2]  = "Watchdog\r\n",
-	[3]  = "HardFault\r\n",
-	[4]  = "MemFault\r\n",
-	[5]  = "BusFault\r\n",
-	[6]  = "UsageFault\r\n",
-	[7]  = "SecureFault\r\n",
-	[8]  = NULL,
-	[9]  = NULL,
-	[10] = NULL,
-	[11] = "SVC\r\n",
-	[12] = "DebugFault\r\n",
-	[13] = NULL,
-	[14] = "PendSV\r\n",
-	[15] = "SysTick\r\n",
+static const char *const fault_type[] =
+    {
+        [0] = NULL,
+        [1] = NULL,
+        [2] = "Watchdog\r\n",
+        [3] = "HardFault\r\n",
+        [4] = "MemFault\r\n",
+        [5] = "BusFault\r\n",
+        [6] = "UsageFault\r\n",
+        [7] = "SecureFault\r\n",
+        [8] = NULL,
+        [9] = NULL,
+        [10] = NULL,
+        [11] = "SVC\r\n",
+        [12] = "DebugFault\r\n",
+        [13] = NULL,
+        [14] = "PendSV\r\n",
+        [15] = "SysTick\r\n",
 };
 
 #if (CONFIG_SHELL_ASYNCLOG)
@@ -226,19 +233,19 @@ static void dump_prologue(void)
 {
 #if CONFIG_FREERTOS_SMP
 
-	#if (CONFIG_SHELL_ASYNCLOG)
-	shell_set_log_cpu(CPU_ID);
-	#endif
+#if (CONFIG_SHELL_ASYNCLOG)
+    shell_set_log_cpu(CPU_ID);
+#endif
 
 #else
 
 #if (CONFIG_SYS_CPU0)
-	#if (CONFIG_SHELL_ASYNCLOG)
-	shell_set_log_cpu(CONFIG_CPU_CNT);
-	shell_set_log_cpu(CPU_ID);
-	#endif
+#if (CONFIG_SHELL_ASYNCLOG)
+    shell_set_log_cpu(CONFIG_CPU_CNT);
+    shell_set_log_cpu(CPU_ID);
+#endif
 #elif (CONFIG_SYS_CPU1)
-	ipc_send_trap_handle_begin();
+    ipc_send_trap_handle_begin();
 #endif
 
 #endif
@@ -248,18 +255,18 @@ static void dump_epilogue(void)
 {
 #if CONFIG_FREERTOS_SMP
 
-	#if (CONFIG_SHELL_ASYNCLOG)
-	shell_set_log_cpu(CONFIG_CPU_CNT);
-	#endif
+#if (CONFIG_SHELL_ASYNCLOG)
+    shell_set_log_cpu(CONFIG_CPU_CNT);
+#endif
 
 #else
-	
+
 #if (CONFIG_SYS_CPU0)
-	#if (CONFIG_SHELL_ASYNCLOG)
-	shell_set_log_cpu(CONFIG_CPU_CNT);
-	#endif
+#if (CONFIG_SHELL_ASYNCLOG)
+    shell_set_log_cpu(CONFIG_CPU_CNT);
+#endif
 #elif (CONFIG_SYS_CPU1)
-	ipc_send_trap_handle_end();
+    ipc_send_trap_handle_end();
 #endif
 
 #endif
@@ -271,11 +278,12 @@ static void dump_epilogue(void)
  * @param mcause
  * @param context
  */
-static void arch_dump_cpu_registers(uint32_t mcause, SAVED_CONTEXT *context) {
+static void arch_dump_cpu_registers(uint32_t mcause, SAVED_CONTEXT *context)
+{
 
     BK_DUMP_OUT("CPU%d Current regs:\r\n", CPU_ID);
 
-	// context of task.
+    // context of task.
     BK_DUMP_OUT("0 r0 x 0x%lx\r\n", context->r0);
     BK_DUMP_OUT("1 r1 x 0x%lx\r\n", context->r1);
     BK_DUMP_OUT("2 r2 x 0x%lx\r\n", context->r2);
@@ -300,10 +308,10 @@ static void arch_dump_cpu_registers(uint32_t mcause, SAVED_CONTEXT *context) {
     BK_DUMP_OUT("22 faultmask x 0x%lx\r\n", context->faultmask);
     BK_DUMP_OUT("23 fpscr x 0x%lx\r\n", context->fpscr);
 
-	// context of ISR.
-	mcause = __get_xPSR();
+    // context of ISR.
+    mcause = __get_xPSR();
     BK_DUMP_OUT("30 CPU%d xPSR x 0x%lx\r\n", CPU_ID, mcause);
-    BK_DUMP_OUT("31 LR x 0x%lx\r\n", context->control);       // exception LR.
+    BK_DUMP_OUT("31 LR x 0x%lx\r\n", context->control); // exception LR.
     BK_DUMP_OUT("32 control x 0x%lx\r\n", __get_CONTROL());
 
     BK_DUMP_OUT("40 MMFAR x 0x%lx\r\n", SCB->MMFAR);
@@ -311,13 +319,12 @@ static void arch_dump_cpu_registers(uint32_t mcause, SAVED_CONTEXT *context) {
     BK_DUMP_OUT("42 CFSR x 0x%lx\r\n", SCB->CFSR);
     BK_DUMP_OUT("43 HFSR x 0x%lx\r\n", SCB->HFSR);
 
-	mcause = mcause & 0x1FF;
+    mcause = mcause & 0x1FF;
 
-	if ( (mcause <= 0x0F) && (fault_type[mcause] != NULL) )
-	{
-		BK_DUMP_OUT((char *)fault_type[mcause]);
-	}
-
+    if ((mcause <= 0x0F) && (fault_type[mcause] != NULL))
+    {
+        BK_DUMP_OUT((char *)fault_type[mcause]);
+    }
 }
 
 static void dump_context(uint32_t lr, uint32_t msp)
@@ -332,7 +339,7 @@ static void dump_context(uint32_t lr, uint32_t msp)
     regs.r9 = ((uint32_t *)msp)[-3];
     regs.r10 = ((uint32_t *)msp)[-2];
     regs.r11 = ((uint32_t *)msp)[-1];
-    regs.control = lr;       // exception LR.
+    regs.control = lr; // exception LR.
 
     regs.msp = __get_MSP();
     regs.psp = __get_PSP();
@@ -343,41 +350,41 @@ static void dump_context(uint32_t lr, uint32_t msp)
 
     regs.fpscr = __get_FPSCR();
 
-	uint32_t stack_pointer = msp;
-	uint32_t stack_adj = 8 * sizeof(uint32_t);
+    uint32_t stack_pointer = msp;
+    uint32_t stack_adj = 8 * sizeof(uint32_t);
 
-	if(lr & (1UL << 2))
-	{
-		stack_pointer = __get_PSP();
-	}
+    if (lr & (1UL << 2))
+    {
+        stack_pointer = __get_PSP();
+    }
 
-	if((lr & (1UL << 4)) == 0)
-	{
-		stack_adj += 18 * sizeof(uint32_t);  // 18 FPU regs.
-	}
+    if ((lr & (1UL << 4)) == 0)
+    {
+        stack_adj += 18 * sizeof(uint32_t); // 18 FPU regs.
+    }
 
-	regs.r0 = ((uint32_t *)stack_pointer)[0];
-	regs.r1 = ((uint32_t *)stack_pointer)[1];
-	regs.r2 = ((uint32_t *)stack_pointer)[2];
-	regs.r3 = ((uint32_t *)stack_pointer)[3];
-	regs.r12 = ((uint32_t *)stack_pointer)[4];
-	regs.lr = ((uint32_t *)stack_pointer)[5];
-	regs.pc = ((uint32_t *)stack_pointer)[6];
-	regs.xpsr = ((uint32_t *)stack_pointer)[7];
+    regs.r0 = ((uint32_t *)stack_pointer)[0];
+    regs.r1 = ((uint32_t *)stack_pointer)[1];
+    regs.r2 = ((uint32_t *)stack_pointer)[2];
+    regs.r3 = ((uint32_t *)stack_pointer)[3];
+    regs.r12 = ((uint32_t *)stack_pointer)[4];
+    regs.lr = ((uint32_t *)stack_pointer)[5];
+    regs.pc = ((uint32_t *)stack_pointer)[6];
+    regs.xpsr = ((uint32_t *)stack_pointer)[7];
 
-	if(regs.xpsr & (1UL << 9))
-	{
-		stack_adj += 1 * sizeof(uint32_t);
-	}
-	regs.sp = stack_pointer + stack_adj;
+    if (regs.xpsr & (1UL << 9))
+    {
+        stack_adj += 1 * sizeof(uint32_t);
+    }
+    regs.sp = stack_pointer + stack_adj;
 
-	rtos_disable_int();
+    rtos_disable_int();
     bk_wdt_feed();
 #if (CONFIG_INT_AON_WDT)
     bk_int_aon_wdt_feed();
 #endif
     bk_set_printf_sync(true);
-	dump_prologue();
+    dump_prologue();
     arch_dump_cpu_registers(0, &regs);
 }
 
@@ -396,18 +403,24 @@ static void rtos_dump_system(void)
     bk_int_aon_wdt_feed();
 #endif
 
-    if(NULL != s_wifi_dump_func) {
+#if CONFIG_SYS_CPU0
+    if (NULL != s_wifi_dump_func)
+    {
         s_wifi_dump_func();
     }
+#else
+    BK_DUMP_OUT("s_wifi_dump_func can't be called in CPU1\r\n");
+#endif
 
-    if(NULL != s_ble_dump_func) {
+    if (NULL != s_ble_dump_func)
+    {
         s_ble_dump_func();
     }
 
     rtos_dump_plat_sys_mems();
 
     bk_psram_heap_dump_data();
-	
+
 #if CONFIG_FREERTOS && CONFIG_MEM_DEBUG
     os_dump_memory_stats(0, 0, NULL);
 #endif
@@ -422,17 +435,18 @@ static void rtos_dump_system(void)
     BK_DUMP_OUT("************************************user except handler end************************************\r\n");
     BK_DUMP_OUT("***********************************************************************************************\r\n");
 
-     dump_peri_regs();
-#endif //CONFIG_DEBUG_FIRMWARE || CONFIG_DUMP_ENABLE
+    dump_peri_regs();
+#endif // CONFIG_DEBUG_FIRMWARE || CONFIG_DUMP_ENABLE
 }
 
 #define CHECK_TASK_WDT_INTERRUPT (0x13)
 
-uint32_t     g_wdt_handler_lr;
+uint32_t g_wdt_handler_lr;
 
 static void user_except_handler(uint32_t reset_reason, SAVED_CONTEXT *regs)
 {
-    if (0 == g_enter_exception) {
+    if (0 == g_enter_exception)
+    {
         // Make sure the interrupt is disable
         uint32_t int_level = rtos_disable_int();
 
@@ -440,16 +454,16 @@ static void user_except_handler(uint32_t reset_reason, SAVED_CONTEXT *regs)
         g_enter_exception = 1;
 
         // if it is a task WDT assert!
-        if((regs->xpsr & 0x1FF) == CHECK_TASK_WDT_INTERRUPT)  // it can be used for any interrupts if LR is saved at entrance of ISR.
+        if ((regs->xpsr & 0x1FF) == CHECK_TASK_WDT_INTERRUPT) // it can be used for any interrupts if LR is saved at entrance of ISR.
         {
-            if(g_wdt_handler_lr & (1UL << 2))
+            if (g_wdt_handler_lr & (1UL << 2))
             {
                 uint32_t stack_pointer = __get_PSP();
                 uint32_t stack_adj = 8 * sizeof(uint32_t);
 
-                if((g_wdt_handler_lr & (1UL << 4)) == 0)
+                if ((g_wdt_handler_lr & (1UL << 4)) == 0)
                 {
-                    stack_adj += 18 * sizeof(uint32_t);  // 18 FPU regs.
+                    stack_adj += 18 * sizeof(uint32_t); // 18 FPU regs.
                 }
 
                 regs->r0 = ((uint32_t *)stack_pointer)[0];
@@ -461,7 +475,7 @@ static void user_except_handler(uint32_t reset_reason, SAVED_CONTEXT *regs)
                 regs->pc = ((uint32_t *)stack_pointer)[6];
                 regs->xpsr = ((uint32_t *)stack_pointer)[7];
 
-                if(regs->xpsr & (1UL << 9))
+                if (regs->xpsr & (1UL << 9))
                 {
                     stack_adj += 1 * sizeof(uint32_t);
                 }
@@ -479,21 +493,24 @@ static void user_except_handler(uint32_t reset_reason, SAVED_CONTEXT *regs)
 #if CONFIG_SYS_CPU0
         bk_reboot_ex(reset_reason);
 #endif
-        while(g_enter_exception);
+        while (g_enter_exception)
+            ;
 
         rtos_enable_int(int_level);
-    } else {
-		dump_epilogue();
+    }
+    else
+    {
+        dump_epilogue();
 #if CONFIG_SYS_CPU0
         bk_wdt_force_reboot();
 #endif
     }
-
 }
 
-///1. Save to stack is better
-///2. Some regs already saved in stack
-static void store_cpu_regs(uint32_t mcause, SAVED_CONTEXT *regs) {
+/// 1. Save to stack is better
+/// 2. Some regs already saved in stack
+static void store_cpu_regs(uint32_t mcause, SAVED_CONTEXT *regs)
+{
     regs->r0 = __get_R0();
     regs->r1 = __get_R1();
     regs->r2 = __get_R2();
@@ -526,7 +543,7 @@ static void store_cpu_regs(uint32_t mcause, SAVED_CONTEXT *regs) {
 extern void bk_set_jtag_mode(uint32_t cpu_id, uint32_t group_id);
 extern volatile const uint8_t build_version[];
 
-void bk_system_dump(void) 
+void bk_system_dump(void)
 {
     SAVED_CONTEXT regs = {0};
     store_cpu_regs(ECAUSE_ASSERT, &regs);
@@ -552,7 +569,8 @@ __attribute__((__used__)) static volatile uint32_t CPUx_crash_recorder = 0;
 void user_except_handler_ex(uint32_t reset_reason, uint32_t lr, uint32_t sp)
 {
 
-    if (0 == g_enter_exception) {
+    if (0 == g_enter_exception)
+    {
 #if CONFIG_INTERRUPT_DEBUG_RECORDER
         CPUx_crash_recorder = sp;
 #endif
@@ -563,7 +581,7 @@ void user_except_handler_ex(uint32_t reset_reason, uint32_t lr, uint32_t sp)
         /* Handled Trap */
         g_enter_exception = 1;
 
-        BK_DUMP_OUT("build time => %s !\r\n", build_version); 
+        BK_DUMP_OUT("build time => %s !\r\n", build_version);
 
         rtos_dump_system();
 
@@ -576,23 +594,25 @@ void user_except_handler_ex(uint32_t reset_reason, uint32_t lr, uint32_t sp)
 #if CONFIG_SYS_CPU0
         bk_reboot_ex(reset_reason);
 #endif
-        while(g_enter_exception);
+        while (g_enter_exception)
+            ;
 
         rtos_enable_int(int_level);
-    } else {
+    }
+    else
+    {
 #if CONFIG_INTERRUPT_DEBUG_RECORDER
         CPUx_crash_recorder = 0;
 #endif
-		dump_epilogue();
+        dump_epilogue();
 #if CONFIG_SYS_CPU0
         bk_misc_set_reset_reason(reset_reason);
         bk_wdt_force_reboot();
 #endif
     }
-
 }
 
-__attribute__((used, section(".null_trap_handler"))) \
-void bk_null_trap_handler(void) {
+__attribute__((used, section(".null_trap_handler"))) void bk_null_trap_handler(void)
+{
     BK_ASSERT(0);
 }

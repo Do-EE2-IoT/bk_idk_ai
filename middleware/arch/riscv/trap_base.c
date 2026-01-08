@@ -26,42 +26,45 @@
 #include "aon_pmu_driver.h"
 
 #if (CONFIG_CACHE_ENABLE)
-	#define SRAM_BLOCK_COUNT 4
-	extern unsigned int g_sram_addr_map[SRAM_BLOCK_COUNT];
+#define SRAM_BLOCK_COUNT 4
+extern unsigned int g_sram_addr_map[SRAM_BLOCK_COUNT];
 #else
-	#if (CONFIG_SYS_CPU1)
-	#define RAM_BASE_ADDR 0x30060000
-	#else
-	#define RAM_BASE_ADDR 0x30000000
-	#endif
+#if (CONFIG_SYS_CPU1)
+#define RAM_BASE_ADDR 0x30060000
+#else
+#define RAM_BASE_ADDR 0x30000000
+#endif
 #endif
 
-#define SYS_DELAY_TIME_5S	    (85000000UL)
+#define SYS_DELAY_TIME_5S (85000000UL)
 
-typedef struct {
-	union {
-		struct {
-			long x1;		/* ra */
-			long x5;		/* t0 */
-			long x6;		/* t1 */
-			long x7;		/* t2 */
-			long x10;		/* a0 */
+typedef struct
+{
+	union
+	{
+		struct
+		{
+			long x1;  /* ra */
+			long x5;  /* t0 */
+			long x6;  /* t1 */
+			long x7;  /* t2 */
+			long x10; /* a0 */
 			long x11;
 			long x12;
 			long x13;
 			long x14;
 			long x15;
 			long x16;
-			long x17;		/* a7 */
-			long x28;		/* t3 */
+			long x17; /* a7 */
+			long x28; /* t3 */
 			long x29;
 			long x30;
-			long x31;		/* t6 */
+			long x31; /* t6 */
 			long mepc;
 			long mstatus;
-			long x8;		/* s0 */
-			long x9;		/* s1 */
-			long x18;		/* s2 */
+			long x8;  /* s0 */
+			long x9;  /* s1 */
+			long x18; /* s2 */
 			long x19;
 			long x20;
 			long x21;
@@ -70,7 +73,7 @@ typedef struct {
 			long x24;
 			long x25;
 			long x26;
-			long x27;		/* s11 */
+			long x27; /* s11 */
 		};
 		long riscv_regs[30];
 	};
@@ -79,14 +82,14 @@ typedef struct {
 typedef void (*hook_func)(void);
 
 extern char _dtcm_ema_start, _dtcm_bss_end, _stack;
-extern char _data_start, _end;  //BSS end in SRAM2
+extern char _data_start, _end; // BSS end in SRAM2
 
 extern void reset_vector(void);
 extern void mtime_handler(void);
 extern void mswi_handler(void);
 extern void mext_interrupt(void);
 extern void stack_mem_dump(uint32_t stack_top, uint32_t stack_bottom);
-extern void user_except_handler (unsigned long mcause, SAVED_CONTEXT *context);
+extern void user_except_handler(unsigned long mcause, SAVED_CONTEXT *context);
 
 static hook_func s_wifi_dump_func = NULL;
 static hook_func s_ble_dump_func = NULL;
@@ -96,27 +99,33 @@ volatile unsigned int g_enter_nmi_vector = 0;
 
 typedef struct sys_mem_info
 {
-    uint32_t mem_base_addr;
-    uint32_t mem_size;
+	uint32_t mem_base_addr;
+	uint32_t mem_size;
 } sys_mem_info_t;
 
-#define MAX_DUMP_SYS_MEM_COUNT       (8)
+#define MAX_DUMP_SYS_MEM_COUNT (8)
 static unsigned int s_mem_count = 0;
 static sys_mem_info_t s_dump_sys_mem_info[MAX_DUMP_SYS_MEM_COUNT] = {0};
 
 extern void trap_entry(void);
 
-void bk_system_dump(void) {
+void bk_system_dump(void)
+{
 	trap_entry();
 }
 
-unsigned int arch_is_enter_exception(void) {
+unsigned int arch_is_enter_exception(void)
+{
 	return g_enter_exception;
 }
 
 void rtos_regist_wifi_dump_hook(hook_func wifi_func)
 {
+#if CONFIG_CPU0
 	s_wifi_dump_func = wifi_func;
+#else
+	BK_DUMP_OUT("s_wifi_dump_func can't be called in CPU1\r\n");
+#endif
 }
 
 void rtos_regist_ble_dump_hook(hook_func ble_func)
@@ -126,17 +135,22 @@ void rtos_regist_ble_dump_hook(hook_func ble_func)
 
 void rtos_regist_plat_dump_hook(uint32_t mem_base_addr, uint32_t mem_size)
 {
-	if (s_mem_count < MAX_DUMP_SYS_MEM_COUNT) {
+	if (s_mem_count < MAX_DUMP_SYS_MEM_COUNT)
+	{
 		s_dump_sys_mem_info[s_mem_count].mem_base_addr = mem_base_addr;
 		s_dump_sys_mem_info[s_mem_count].mem_size = mem_size;
 		s_mem_count++;
-	} else {
+	}
+	else
+	{
 		BK_DUMP_OUT("rtos_regist_plat_dump_hook failed:s_mem_count(%d).\r\n", s_mem_count);
 	}
 }
 
-void rtos_dump_plat_sys_regs(void) {
-	for (int i = 0; i < s_mem_count; i++) {
+void rtos_dump_plat_sys_regs(void)
+{
+	for (int i = 0; i < s_mem_count; i++)
+	{
 		uint32_t begin = s_dump_sys_mem_info[i].mem_base_addr;
 		uint32_t end = begin + s_dump_sys_mem_info[i].mem_size;
 		stack_mem_dump(begin, end);
@@ -144,22 +158,24 @@ void rtos_dump_plat_sys_regs(void) {
 }
 
 #if CONFIG_SYS_CPU0
-static uint32_t get_reset_reason_by_mcause(uint32_t mcause) {
-	switch (mcause) {
-		case 0x2:
-			return RESET_SOURCE_CRASH_ILLEGAL_INSTRUCTION;
-		case 0x4:
-		case 0x6:
-			return RESET_SOURCE_CRASH_MISALIGNED;
-		case U_EXCP_L_ACC_FAULT:
-		case U_EXCP_S_ACC_FAULT:
-			return RESET_SOURCE_CRASH_DATA_ABORT;
-		case TRAP_M_USER_ASSERT:
-			return RESET_SOURCE_CRASH_ASSERT;
-		case TRAP_M_USER_NP_WDT:
-			return RESET_SOURCE_WATCHDOG;
-		default:
-			return RESET_SOURCE_UNKNOWN;
+static uint32_t get_reset_reason_by_mcause(uint32_t mcause)
+{
+	switch (mcause)
+	{
+	case 0x2:
+		return RESET_SOURCE_CRASH_ILLEGAL_INSTRUCTION;
+	case 0x4:
+	case 0x6:
+		return RESET_SOURCE_CRASH_MISALIGNED;
+	case U_EXCP_L_ACC_FAULT:
+	case U_EXCP_S_ACC_FAULT:
+		return RESET_SOURCE_CRASH_DATA_ABORT;
+	case TRAP_M_USER_ASSERT:
+		return RESET_SOURCE_CRASH_ASSERT;
+	case TRAP_M_USER_NP_WDT:
+		return RESET_SOURCE_WATCHDOG;
+	default:
+		return RESET_SOURCE_UNKNOWN;
 	}
 }
 #endif
@@ -170,7 +186,8 @@ void trap_handler(unsigned long mcause, SAVED_CONTEXT *context)
 	uint32_t reset_reason = get_reset_reason_by_mcause((uint32_t)mcause);
 #endif
 
-	if (0 == g_enter_exception) {
+	if (0 == g_enter_exception)
+	{
 		// Make sure the interrupt is disable
 		uint32_t int_level = rtos_disable_int();
 		uint32_t mie_status = read_csr(NDS_UIE);
@@ -178,30 +195,31 @@ void trap_handler(unsigned long mcause, SAVED_CONTEXT *context)
 
 		/* Handled Trap */
 		g_enter_exception = 1;
-		
+
 		user_except_handler(mcause, context);
 #if CONFIG_SYS_CPU0
 		bk_reboot_ex(reset_reason);
 #endif
-		while(g_enter_exception);
+		while (g_enter_exception)
+			;
 
 		set_csr(NDS_UIE, mie_status);
 		rtos_enable_int(int_level);
-	} else {
+	}
+	else
+	{
 #if CONFIG_SYS_CPU0
 		bk_wdt_force_reboot();
 #endif
 	}
-
 }
 
-
 #if (CONFIG_SYS_CPU0)
-#define CPU_ID     0
+#define CPU_ID 0
 #endif
 
 #if (CONFIG_SYS_CPU1)
-#define CPU_ID     1
+#define CPU_ID 1
 #endif
 
 /**
@@ -210,7 +228,7 @@ void trap_handler(unsigned long mcause, SAVED_CONTEXT *context)
  * @param mcause
  * @param context
  */
-void arch_dump_cpu_registers (unsigned long mcause, SAVED_CONTEXT *context)
+void arch_dump_cpu_registers(unsigned long mcause, SAVED_CONTEXT *context)
 {
 
 	BK_DUMP_OUT("CPU%d Current regs:\r\n", CPU_ID);
@@ -245,9 +263,12 @@ void arch_dump_cpu_registers (unsigned long mcause, SAVED_CONTEXT *context)
 	BK_DUMP_OUT("30 t5 x 0x%lx\r\n", context->x30);
 	BK_DUMP_OUT("31 t6 x 0x%lx\r\n", context->x31);
 
-	if (mcause == TRAP_M_USER_ASSERT) {
+	if (mcause == TRAP_M_USER_ASSERT)
+	{
 		BK_DUMP_OUT("32 pc x 0x%lx\r\n", context->x1);
-	} else {
+	}
+	else
+	{
 		BK_DUMP_OUT("32 pc x 0x%lx\r\n", context->mepc);
 	}
 
@@ -258,25 +279,26 @@ void arch_dump_cpu_registers (unsigned long mcause, SAVED_CONTEXT *context)
 	BK_DUMP_OUT("898 uepc x 0x%lx\r\n", context->mepc);
 	BK_DUMP_OUT("899 ucause x 0x%lx\r\n", mcause);
 	BK_DUMP_OUT("900 utval x 0x%lx\r\n", read_csr(NDS_UTVAL));
-    BK_DUMP_OUT("2058 udcause x 0x%lx\r\n", read_csr(NDS_UDCAUSE));
+	BK_DUMP_OUT("2058 udcause x 0x%lx\r\n", read_csr(NDS_UDCAUSE));
 	BK_DUMP_OUT("\r\n");
 
-	if (mcause == 0x2) {
+	if (mcause == 0x2)
+	{
 		stack_mem_dump((uint32_t)(context->mepc - 32), (uint32_t)(context->mepc + 32));
 	}
 }
 
-void sys_delay_sync(uint32_t time_count )
+void sys_delay_sync(uint32_t time_count)
 {
 	volatile UINT32 i = 0;
 
-	for (i = 0; i < time_count; i ++)
+	for (i = 0; i < time_count; i++)
 		;
 }
 
 extern volatile const uint8_t build_version[];
 extern void smem_dump_lastblock(void);
-void user_except_handler (unsigned long mcause, SAVED_CONTEXT *context)
+void user_except_handler(unsigned long mcause, SAVED_CONTEXT *context)
 {
 #if CONFIG_DEBUG_FIRMWARE || CONFIG_DUMP_ENABLE
 	BK_LOG_FLUSH();
@@ -288,33 +310,36 @@ void user_except_handler (unsigned long mcause, SAVED_CONTEXT *context)
 
 	arch_dump_cpu_registers(mcause, context);
 
-	BK_DUMP_OUT("build time => %s !\r\n", build_version); 
+	BK_DUMP_OUT("build time => %s !\r\n", build_version);
 
 #if CONFIG_INT_WDT
 	bk_wdt_feed();
 #endif
 
-	if(NULL != s_wifi_dump_func) {
+	if (NULL != s_wifi_dump_func)
+	{
 		s_wifi_dump_func();
 	}
 
-	if(NULL != s_ble_dump_func) {
+	if (NULL != s_ble_dump_func)
+	{
 		s_ble_dump_func();
 	}
-	
+
 	rtos_dump_plat_sys_regs();
 
 #if CONFIG_MEMDUMP_ALL
-	//Dump DTCM
+	// Dump DTCM
 	stack_mem_dump((uint32_t)&_dtcm_ema_start, (uint32_t)&_stack);
 #if CONFIG_CACHE_ENABLE && (CONFIG_SYS_CPU0)
-	for (int i = 0; i < SRAM_BLOCK_COUNT; i++) {
+	for (int i = 0; i < SRAM_BLOCK_COUNT; i++)
+	{
 		stack_mem_dump(g_sram_addr_map[i], g_sram_addr_map[i] + 0x20000);
 	}
 #else
-	//Dump Data and BSS
+	// Dump Data and BSS
 	stack_mem_dump((uint32_t)&_data_start, (uint32_t)&_end);
-	//Dump BLE VIDEO
+	// Dump BLE VIDEO
 	smem_dump_lastblock();
 #endif
 #endif
@@ -334,91 +359,111 @@ void user_except_handler (unsigned long mcause, SAVED_CONTEXT *context)
 	BK_DUMP_OUT("***********************************************************************************************\r\n");
 	BK_DUMP_OUT("************************************user except handler end************************************\r\n");
 	BK_DUMP_OUT("***********************************************************************************************\r\n");
-#endif //CONFIG_DEBUG_FIRMWARE
+#endif // CONFIG_DEBUG_FIRMWARE
 }
 
-void set_reboot_tag(uint32_t tag) {
+void set_reboot_tag(uint32_t tag)
+{
 	REG_WRITE(REBOOT_TAG_ADDR, tag);
 }
 
-inline uint32_t get_reboot_tag(void) {
+inline uint32_t get_reboot_tag(void)
+{
 	return REG_READ(REBOOT_TAG_ADDR);
 }
 
-void set_nmi_vector(void) {
+void set_nmi_vector(void)
+{
 	uint32_t nmi_vector = (uint32_t)reset_vector;
 	REG_WRITE(SAVE_JUMPAPP_ADDR, nmi_vector);
 }
 
-void user_nmi_handler(unsigned long mcause, unsigned long ra) {
+void user_nmi_handler(unsigned long mcause, unsigned long ra)
+{
 #if CONFIG_DEBUG_FIRMWARE || CONFIG_DUMP_ENABLE
-	if(g_enter_nmi_vector == 1)
+	if (g_enter_nmi_vector == 1)
 	{
-		//For nmi wdt reset
+		// For nmi wdt reset
 		aon_pmu_drv_wdt_change_not_rosc_clk();
 		aon_pmu_drv_wdt_rst_dev_enable();
-		while(1);
+		while (1)
+			;
 	}
 
 	g_enter_nmi_vector = 1;
 
-	if(mcause == MCAUSE_CAUSE_WATCHDOG) {
-		if( REBOOT_TAG_REQ == get_reboot_tag() ) {
-			while(1);
-		} else {
+	if (mcause == MCAUSE_CAUSE_WATCHDOG)
+	{
+		if (REBOOT_TAG_REQ == get_reboot_tag())
+		{
+			while (1)
+				;
+		}
+		else
+		{
 			bk_misc_set_reset_reason(RESET_SOURCE_WATCHDOG);
 		}
 	}
 
-	#if CONFIG_INT_WDT
-		bk_wdt_feed();
-	#endif
+#if CONFIG_INT_WDT
+	bk_wdt_feed();
+#endif
 	BK_DUMP_OUT("======== WDT reset.========\r\n");
 	BK_DUMP_OUT("1 ra x 0x%lx\r\n", ra);
 	BK_DUMP_OUT("======== WDT reset.========\r\n");
 #else
-	if( REBOOT_TAG_REQ != get_reboot_tag() ) {
+	if (REBOOT_TAG_REQ != get_reboot_tag())
+	{
 		bk_misc_set_reset_reason(RESET_SOURCE_WATCHDOG);
 	}
 	aon_pmu_drv_wdt_change_not_rosc_clk();
 	aon_pmu_drv_wdt_rst_dev_enable();
-	while(1);
+	while (1)
+		;
 #endif
 }
 
 #if CONFIG_SAVE_BOOT_TIME_POINT
 
-static uint64_t s_saved_boot_info[2*CPU_SAVED_TIME_MAX];
+static uint64_t s_saved_boot_info[2 * CPU_SAVED_TIME_MAX];
 
 extern uint64_t riscv_get_mtimer(void);
 extern uint64_t riscv_get_instruct_cnt(void);
 
-static uint32_t get_saved_time_info_addr(uint32_t time_point) {
+static uint32_t get_saved_time_info_addr(uint32_t time_point)
+{
 	uint32_t addr = 0;
 
-	if (CPU_BOOT_TIME == time_point) {
-		//The BSS section not ready at cpu boot time point
+	if (CPU_BOOT_TIME == time_point)
+	{
+		// The BSS section not ready at cpu boot time point
 		addr = CPU_BOOT_TIME_ADDR;
-	} else if (time_point < CPU_SAVED_TIME_MAX){
-		addr = (uint32_t)&s_saved_boot_info[2*time_point];
+	}
+	else if (time_point < CPU_SAVED_TIME_MAX)
+	{
+		addr = (uint32_t)&s_saved_boot_info[2 * time_point];
 	}
 
 	return addr;
 }
 
-void save_mtime_point(uint32_t time_point) {
+void save_mtime_point(uint32_t time_point)
+{
 	uint32_t addr = get_saved_time_info_addr(time_point);
 
-	if (0 != addr) {
+	if (0 != addr)
+	{
 		*((uint64_t *)addr) = riscv_get_mtimer();
 		*((uint64_t *)addr + 1) = riscv_get_instruct_cnt();
 	}
 }
 
-void show_saved_mtime_point(uint32_t time_point) {
+void show_saved_mtime_point(uint32_t time_point)
+{
 	uint32_t addr = get_saved_time_info_addr(time_point);
 
-	if (0 != addr) {
+	if (0 != addr)
+	{
 		uint64_t saved_time = *((uint64_t *)addr);
 		uint64_t saved_inst_cnt = *((uint64_t *)addr + 1);
 		uint32_t saved_time_ms = (u32)(saved_time & 0xFFFFFFFF) / 26000;
@@ -467,10 +512,11 @@ void show_saved_mtime_info(void)
 	show_saved_mtime_point(CPU_CONNECTED_TIME);
 }
 
-
-void show_current_time_point(const char *info) {
-	uint64_t current_time = riscv_get_mtimer();;
-	uint32_t current_time_ms = (u32) (current_time/26000);
+void show_current_time_point(const char *info)
+{
+	uint64_t current_time = riscv_get_mtimer();
+	;
+	uint32_t current_time_ms = (u32)(current_time / 26000);
 	BK_DUMP_OUT("%s: current time: %ldms\r\n", info, current_time_ms);
 }
 
