@@ -1739,9 +1739,15 @@ static inline int wifi_ap_init_rw_driver(void)
 
 static inline void wifi_sta_init_callback(void)
 {
-	if (!(bk_feature_close_coexist_csa() || close_coexist_csa))
+	if (!(bk_feature_close_coexist_csa() || close_coexist_csa)){
 		bk_wlan_reg_csa_cb_coexist_mode(); // TODO why need this???
+		os_printf("register csa cb in sta mode\r\n");
+	}
+
+
+	os_printf("register bcn cb in sta mode\r\n");
 	wifi_sta_reg_bcn_cb();
+	os_printf("register cb in sta mode done\r\n");
 }
 
 static inline int wifi_supplicant_start(void)
@@ -2100,9 +2106,9 @@ bk_err_t bk_wifi_sta_start(void)
 	os_printf("wifi sta global init \r\n");
 	wifi_sta_init_global_config();
 
-	//os_printf("wifi sta init callback\r\n");
-// 	// enable softap's channel to follow STA's channel
-// 	wifi_sta_init_callback();
+	os_printf("wifi sta init callback\r\n");
+	// enable softap's channel to follow STA's channel
+	wifi_sta_init_callback();
 
 // 	os_printf("wifi_sta get global config \r\n");
 // 	wifi_sta_get_global_config(&sta_config);
