@@ -186,6 +186,7 @@ void demo_sta_adv_app_init(char *oob_ssid, char *connect_key)
 
 	BK_LOGW(TAG, "ssid:%s  key:%s\r\n", sta_config.ssid, sta_config.password);
 	BK_LOG_ON_ERR(bk_wifi_sta_set_config(&sta_config));
+	os_printf("Wifi station starting .......\r\n" );
 	BK_LOG_ON_ERR(bk_wifi_sta_start());
 }
 

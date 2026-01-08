@@ -2024,29 +2024,31 @@ bk_err_t bk_wifi_sta_start(void)
 #endif
 	bool fast_connect __maybe_unused = false;
 	struct wlan_fast_connect_info fci;
-
+                                      
 	WIFI_LOGD("sta starting\n");
 	sta_tick.sta_start_tick = rtos_get_time();
 	if (wifi_monitor_is_started()) {
-		WIFI_LOGI("sta start fail, monitor in progress\n");
+		WIFI_LOGW("sta start fail, monitor in progress\n");
 		return BK_ERR_WIFI_MONITOR_IP;
 	}
 	if (g_is_deepsleep)
 	{
-		WIFI_LOGI("sta start fail, deepsleep in progress\n");
+		WIFI_LOGW("sta start fail, deepsleep in progress\n");
 		return BK_ERR_WIFI_STA_NOT_CONFIG;
 	}
 
 	if (!wifi_sta_is_configured()) {
-		WIFI_LOGI("sta start fail, sta not configured\n");
+		WIFI_LOGW("sta start fail, sta not configured\n");
 		return BK_ERR_WIFI_STA_NOT_CONFIG;
 	}
-
+        os_printf("wifi sta global init \r\n");
 	wifi_sta_init_global_config();
-
+          
+	os_printf("wifi sta init callback\r\n");
 	// enable softap's channel to follow STA's channel
 	wifi_sta_init_callback();
 
+        os_printf("wifi_sta get global config \r\n");
 	wifi_sta_get_global_config(&sta_config);
 
 #ifdef CONFIG_CONNECT_THROUGH_PSK_OR_SAE_PASSWORD
@@ -2072,12 +2074,12 @@ bk_err_t bk_wifi_sta_start(void)
 		if (req_ssid_len > SSID_MAX_LEN)
 			req_ssid_len = SSID_MAX_LEN;
 
-#if 0
+#if 1
 		print_hex_dump("fci: ", &fci, sizeof(fci));
-		WIFI_LOGI("  ssid: |%s|\n", fci.ssid);
-		WIFI_LOGI("  bssid: %pM\n", fci.bssid);
-		WIFI_LOGI("  chan: %d\n", fci.channel);
-		WIFI_LOGI("  desire ssid: |%s|\n", sta_config.ssid);
+		WIFI_LOGW("  ssid: |%s|\n", fci.ssid);
+		WIFI_LOGW("  bssid: %pM\n", fci.bssid);
+		WIFI_LOGW("  chan: %d\n", fci.channel);
+		WIFI_LOGW("  desire ssid: |%s|\n", sta_config.ssid);
 #endif
 		if (((ssid_len == req_ssid_len &&
 			os_memcmp(sta_config.ssid, fci.ssid, ssid_len) == 0) ||
@@ -2092,10 +2094,10 @@ bk_err_t bk_wifi_sta_start(void)
 			g_sta_param_ptr->fast_connect.chann = fci.channel;
 			g_sta_param_ptr->fast_connect_set = 1;
 
-			WIFI_LOGI("fast_connect\n");
-#if 0
-			WIFI_LOGI("  chan: %d\n", fci.channel);
-			WIFI_LOGI("  PMK: %s\n", psk);
+			WIFI_LOGW("fast_connect\n");
+#if 1
+			WIFI_LOGW("  chan: %d\n", fci.channel);
+			WIFI_LOGW("  PMK: %s\n", psk);
 #endif
 			if (os_strlen((char *)psk) == 0) {
 				/* no psk info, calcuate pmk */
@@ -2123,7 +2125,7 @@ bk_err_t bk_wifi_sta_start(void)
 	}
 
 	if (wifi_sta_is_started()) {
-		WIFI_LOGI("sta already started, ignored!\n");
+		WIFI_LOGW("sta already started, ignored!\n");
 		return BK_OK;
 	}
 
@@ -2186,7 +2188,8 @@ bk_err_t bk_wifi_sta_start(void)
 	WIFI_LOGD("sta started(%x)\n", s_wifi_state_bits);
 
 	/* always connect the AP automatically */
-	bk_wifi_sta_connect();
+	bk_wifi_sta_connect(); 
+	os_printf("Station connect now\r\n");
 
 	return BK_OK;
 }
