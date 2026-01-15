@@ -34,7 +34,8 @@ typedef enum {
     AI_AGENT_CONFIG,
     FACTORY_RESET,
     AUDIO_BUF_APPEND,
-    WAKEUP
+    WAKEUP,
+    SING
 } key_event_t;
 
 typedef enum{
