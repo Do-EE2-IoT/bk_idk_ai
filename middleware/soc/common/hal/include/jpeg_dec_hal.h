@@ -24,7 +24,7 @@ extern "C" {
 
 #define addJPEG_data_st                                         (addJPEG_Reg0x9 & 0x100)
 #define addJPEG_ycount                                          (addJPEG_Reg0x9 & 0xff)
-#define WORK_AREA_SIZE 4096 * 3
+#define WORK_AREA_SIZE 4096
 
 #define JD_SZBUF        1024    /* Size of stream input buffer */
 #define JD_FORMAT       0       /* Output pixel format 0:RGB888 (3 BYTE/pix), 1:RGB565 (1 WORD/pix) */
