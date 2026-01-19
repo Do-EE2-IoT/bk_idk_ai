@@ -121,7 +121,7 @@ int jpg_decoder_init(void)
 		os_free(jpg_dec_st.workbuf);
 		jpg_dec_st.workbuf = NULL;
 	}
-	jpg_dec_st.workbuf = psram_malloc(WORK_AREA_SIZE);
+	jpg_dec_st.workbuf = os_malloc(WORK_AREA_SIZE);
 
 	if (NULL == jpg_dec_st.workbuf)
 	{
