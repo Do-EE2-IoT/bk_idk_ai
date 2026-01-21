@@ -524,7 +524,7 @@ static int sc7a20_init(void)
         SC7A20_LOGE("read chip id fail\r\n");
         return -1;
     }
-    os_printf("SL_Read_Reg = %d\r\n",SL_Read_Reg);
+    os_printf("IMU address = %d\r\n",SL_Read_Reg);
     if(SL_Read_Reg != SC7A20_CHIP_ID_VALUE)
     {
         SC7A20_LOGE("gsensor read chip id 0x%02x is wrong\r\n", SL_Read_Reg);

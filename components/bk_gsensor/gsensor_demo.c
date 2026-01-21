@@ -33,7 +33,7 @@ typedef struct {
 	void *param;
 } gsensor_demo_msg_t;
 
-#define GSENSOR_G_INT1_PIN       GPIO_48
+#define GSENSOR_G_INT1_PIN       GPIO_39
 static beken_thread_t  s_gsensor_demo_thread_hdl = NULL;
 static beken_queue_t s_gsensor_demo_msg_que = NULL;
 
@@ -139,6 +139,7 @@ static int gsensor_demo_msg(gsensor_module_opcode_t op_code)
             gsensor_handle = bk_gsensor_init("sc7a20");
             if(gsensor_handle != NULL)
             {
+                os_printf("GSENSOR init ok, start config\r\n");
                 bk_gsensor_setMode(gsensor_handle,GSENSOR_MODE_NOMAL);
                 bk_gsensor_setDatarate(gsensor_handle,GSENSOR_DR_50HZ);
                 bk_gsensor_setDateRange(gsensor_handle,GSENSOR_RANGE_2G);
