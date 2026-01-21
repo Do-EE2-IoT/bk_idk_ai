@@ -1044,18 +1044,23 @@ bk_err_t bk_sd_card_init(void)
 		return BK_OK;
 	}
 
-#if CONFIG_SDIO_V2P0
+#if CONFIG_SDIO_V2P0 \
+	os_printf("CONFIG_SDIO_V2P0 \r\n");
 	sdio_cfg.clock_freq = SDIO_HOST_CLK_100K;
 #else
 	sdio_cfg.clock_freq = CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ;
 #endif
 #if CONFIG_SDIO_4LINES_EN
+    
 	sdio_cfg.bus_width = SDIO_HOST_BUS_WIDTH_4LINE;
+	os_printf("SDIO_HOST_BUS_WIDTH_4LINE \r\n");
 #else
 	sdio_cfg.bus_width = SDIO_HOST_BUS_WIDTH_1LINE;
+	os_printf("SDIO_HOST_BUS_WIDTH_1LINE \r\n");
 #endif
 #if CONFIG_SDIO_GDMA_EN
-	sdio_cfg.dma_tx_en = 1;
+	os_printf("CONFIG_SDIO_GDMA_EN \r\n");
+		sdio_cfg.dma_tx_en = 1;
 	sdio_cfg.dma_rx_en = 1;
 #endif
 	s_sd_card_obj.clock_freq = sdio_cfg.clock_freq;
