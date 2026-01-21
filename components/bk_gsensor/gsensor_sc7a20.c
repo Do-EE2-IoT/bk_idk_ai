@@ -513,6 +513,7 @@ static int sc7a20_init(void)
     i2c_cfg.addr_mode = I2C_ADDR_MODE_7BIT;
     i2c_cfg.slave_addr = SC7A20_IIC_ADDRESS;
     bk_i2c_init(GSENSOR_I2C_ID, &i2c_cfg);
+    
     //bsp_i2c_init(GSENSOR_I2C_ID,GSENSOR_I2C_SCL_PIN,GSENSOR_I2C_SDA_PIN,&i2c_cfg);
 
     uint8_t ret;

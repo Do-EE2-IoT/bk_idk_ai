@@ -551,7 +551,7 @@ bk_err_t bk_i2c_init(i2c_id_t id, const i2c_config_t *cfg)
 	gpio_dev_unmap(HWD_GPIO_I2C_SDA);
 	gpio_dev_unmap(HWD_GPIO_I2C_SCL);
 	os_printf("Use i2c sda = %d & scl %d \r\n", HWD_GPIO_I2C_SDA, HWD_GPIO_I2C_SCL);
-		I2cInit();
+	I2cInit();
 
 	return BK_OK;
 }
