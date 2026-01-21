@@ -984,11 +984,11 @@ static bk_err_t sd_card_init_card(void)
 #if CONFIG_SDIO_V2P0
 	s_sd_card_obj.clock_freq = CONFIG_SDCARD_DEFAULT_CLOCK_FREQ;
 	bk_sdio_host_set_clock_freq(s_sd_card_obj.clock_freq);
-	SD_CARD_LOGI("sdio clock freq:%d->%d\r\n", CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ, s_sd_card_obj.clock_freq);
+	SD_CARD_LOGW("sdio clock freq:%d->%d\r\n", CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ, s_sd_card_obj.clock_freq);
 #else
 	s_sd_card_obj.clock_freq = SDIO_HOST_CLK_13M;
 	bk_sdio_host_set_clock_freq(SDIO_HOST_CLK_13M);
-	SD_CARD_LOGI("sdio clock freq:%d->%d\r\n", CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ, SDIO_HOST_CLK_13M);
+	SD_CARD_LOGW("sdio clock freq:%d->%d\r\n", CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ, SDIO_HOST_CLK_13M);
 #endif
 	rtos_delay_milliseconds(2);
 
@@ -1037,7 +1037,7 @@ bk_err_t bk_sd_card_init(void)
 #endif
 
 	if (s_sd_card_is_init) {
-		SD_CARD_LOGI("sd card has inited\r\n");
+		SD_CARD_LOGW("sd card has inited\r\n");
 #if CONFIG_SDIO_V2P0
 		rtos_unlock_mutex(&s_mutex_sdcard);
 #endif
@@ -1047,20 +1047,22 @@ bk_err_t bk_sd_card_init(void)
 #if CONFIG_SDIO_V2P0 \
 	os_printf("CONFIG_SDIO_V2P0 \r\n");
 	sdio_cfg.clock_freq = SDIO_HOST_CLK_100K;
+	SD_CARD_LOGW("SDIO_HOST_CLK_100K  CONFIG_SDIO_V2P0\r\n");
 #else
 	sdio_cfg.clock_freq = CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ;
+	SD_CARD_LOGW("CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ\r\n");
 #endif
 #if CONFIG_SDIO_4LINES_EN
     
 	sdio_cfg.bus_width = SDIO_HOST_BUS_WIDTH_4LINE;
-	os_printf("SDIO_HOST_BUS_WIDTH_4LINE \r\n");
+	SD_CARD_LOGW("SDIO_HOST_BUS_WIDTH_4LINE \r\n");
 #else
 	sdio_cfg.bus_width = SDIO_HOST_BUS_WIDTH_1LINE;
-	os_printf("SDIO_HOST_BUS_WIDTH_1LINE \r\n");
+	SD_CARD_LOGW("SDIO_HOST_BUS_WIDTH_1LINE \r\n");
 #endif
 #if CONFIG_SDIO_GDMA_EN
-	os_printf("CONFIG_SDIO_GDMA_EN \r\n");
-		sdio_cfg.dma_tx_en = 1;
+	SD_CARD_LOGW("CONFIG_SDIO_GDMA_EN \r\n");
+	sdio_cfg.dma_tx_en = 1;
 	sdio_cfg.dma_rx_en = 1;
 #endif
 	s_sd_card_obj.clock_freq = sdio_cfg.clock_freq;
