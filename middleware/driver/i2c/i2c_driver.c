@@ -265,15 +265,15 @@ static void i2c_id_init_common(i2c_id_t id)
 	clk_set_i2c_clk_26m(id);
 	icu_enable_i2c_interrupt(id);
 #endif
-#if CONFIG_GPIO_DEFAULT_SET_SUPPORT
-	/*
-	 * GPIO info is setted in GPIO_DEFAULT_DEV_CONFIG and
-	 * inited in bk_gpio_driver_init->gpio_hal_default_map_init.
-	 * If needs to re-config GPIO, can deal it here.
-	 */
-#else
+// #if CONFIG_GPIO_DEFAULT_SET_SUPPORT
+// 	/*
+// 	 * GPIO info is setted in GPIO_DEFAULT_DEV_CONFIG and
+// 	 * inited in bk_gpio_driver_init->gpio_hal_default_map_init.
+// 	 * If needs to re-config GPIO, can deal it here.
+// 	 */
+// #else
 	i2c_init_gpio(id);
-#endif
+// #endif
 	if (s_i2c[id].tx_sema == NULL)
 	{
 		ret = rtos_init_semaphore(&(s_i2c[id].tx_sema), 1);
