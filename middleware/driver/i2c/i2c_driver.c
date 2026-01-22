@@ -106,19 +106,18 @@ typedef struct bkTimerCallback
 		}                                                        \
 	} while (0)
 
-#define I2C_SET_PIN(id)                                             \
-	do                                                              \
-	{                                                               \
-		i2c_hal_set_pin(&s_i2c[id].hal);                            \
-		gpio_dev_unmap(I2C##id##_LL_SDA_PIN);                       \
-		gpio_dev_unmap(I2C##id##_LL_SCL_PIN);                       \
-		gpio_dev_map(I2C##id##_LL_SCL_PIN, GPIO_DEV_I2C##id##_SCL); \
-		gpio_dev_map(I2C##id##_LL_SDA_PIN, GPIO_DEV_I2C##id##_SDA); \
-		bk_gpio_pull_up(I2C##id##_LL_SCL_PIN);                      \
-		bk_gpio_pull_up(I2C##id##_LL_SDA_PIN);                      \
-		BK_LOGW("I2C", "I2C%d configured - SCL_PIN: %d, SDA_PIN: %d\r\n", id, I2C##id##_LL_SCL_PIN, I2C##id##_LL_SDA_PIN);
-}
-while (0)
+#define I2C_SET_PIN(id)                                                                                                    \
+	do                                                                                                                     \
+	{                                                                                                                      \
+		i2c_hal_set_pin(&s_i2c[id].hal);                                                                                   \
+		gpio_dev_unmap(I2C##id##_LL_SDA_PIN);                                                                              \
+		gpio_dev_unmap(I2C##id##_LL_SCL_PIN);                                                                              \
+		gpio_dev_map(I2C##id##_LL_SCL_PIN, GPIO_DEV_I2C##id##_SCL);                                                        \
+		gpio_dev_map(I2C##id##_LL_SDA_PIN, GPIO_DEV_I2C##id##_SDA);                                                        \
+		bk_gpio_pull_up(I2C##id##_LL_SCL_PIN);                                                                             \
+		bk_gpio_pull_up(I2C##id##_LL_SDA_PIN);                                                                             \
+		BK_LOGW("I2C", "I2C%d configured - SCL_PIN: %d, SDA_PIN: %d\r\n", id, I2C##id##_LL_SCL_PIN, I2C##id##_LL_SDA_PIN); \
+	} while (0)
 
 #if CONFIG_SPE
 #define I2C_CHECK_SECURE(id)                     \
@@ -140,7 +139,7 @@ while (0)
 #define I2C_CHECK_SECURE(id)
 #endif
 
-	static bkTimercb_t i2ccallback[SOC_I2C_UNIT_NUM] = {0};
+static bkTimercb_t i2ccallback[SOC_I2C_UNIT_NUM] = {0};
 static i2c_driver_t s_i2c[SOC_I2C_UNIT_NUM] = {0};
 static bool s_i2c_driver_is_init = false;
 
