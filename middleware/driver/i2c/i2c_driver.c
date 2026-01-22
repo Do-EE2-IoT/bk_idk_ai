@@ -151,9 +151,9 @@ static void i2c1_isr(void);
 static void i2c2_isr(void);
 #endif
 
-#if CONFIG_GPIO_DEFAULT_SET_SUPPORT
-// if the special hardware/board needs to over-write the I2C GPIO,please implement it here like i2c_init_gpio
-#else
+// #if CONFIG_GPIO_DEFAULT_SET_SUPPORT
+// // if the special hardware/board needs to over-write the I2C GPIO,please implement it here like i2c_init_gpio
+// #else
 static void i2c_init_gpio(i2c_id_t id)
 {
 	switch (id)
@@ -175,7 +175,7 @@ static void i2c_init_gpio(i2c_id_t id)
 		break;
 	}
 }
-#endif
+// #endif
 
 #if (CONFIG_SYSTEM_CTRL)
 static void i2c_clock_enable(i2c_id_t id)
