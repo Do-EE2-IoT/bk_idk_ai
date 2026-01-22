@@ -516,7 +516,7 @@ static int sc7a20_init(void)
     bk_i2c_init(GSENSOR_I2C_ID, &i2c_cfg);
 
     // Scan all I2C addresses
-    SC7A20_LOGI("Starting I2C address scan...\r\n");
+    SC7A20_LOGW("Starting I2C address scan...\r\n");
     for (uint8_t addr = 0x01; addr < 0x7F; addr++)
     {
         i2c_transfer_t scan_trx = {0};
@@ -531,10 +531,10 @@ static int sc7a20_init(void)
 
         if (gsensor_i2c_read(&scan_trx) == BK_OK)
         {
-            SC7A20_LOGI("Found I2C device at address: 0x%02X\r\n", addr);
+            SC7A20_LOGW("Found I2C device at address: 0x%02X\r\n", addr);
         }
     }
-    SC7A20_LOGI("I2C address scan completed\r\n");
+    SC7A20_LOGW("I2C address scan completed\r\n");
 
     // bsp_i2c_init(GSENSOR_I2C_ID,GSENSOR_I2C_SCL_PIN,GSENSOR_I2C_SDA_PIN,&i2c_cfg);
 
