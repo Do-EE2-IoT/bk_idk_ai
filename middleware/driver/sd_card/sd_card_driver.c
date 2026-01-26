@@ -1045,7 +1045,7 @@ bk_err_t bk_sd_card_init(void)
 	}
 
 #if CONFIG_SDIO_V2P0
-	sdio_cfg.clock_freq = SDIO_HOST_CLK_1_6M;
+	sdio_cfg.clock_freq = SDIO_HOST_CLK_26M;
 	SD_CARD_LOGW("SDIO_HOST_CLK_100K  CONFIG_SDIO_V2P0\r\n");
 #else
 	sdio_cfg.clock_freq = CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ;
@@ -1075,7 +1075,7 @@ bk_err_t bk_sd_card_init(void)
 #endif
 	/* Initialize SDIO peripheral interface with default configuration */
 	BK_RETURN_ON_ERR(bk_sdio_host_init(&sdio_cfg));
-	SD_CARD_LOGI("sdio host init ok, clock_freq:%d\r\n", sdio_cfg.clock_freq);
+	SD_CARD_LOGW("sdio host init ok, clock_freq:%d\r\n", sdio_cfg.clock_freq);
 	rtos_delay_milliseconds(30);
 
 #if CONFIG_SDCARD_OPS_TRACE_EN

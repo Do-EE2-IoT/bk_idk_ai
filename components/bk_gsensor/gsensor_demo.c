@@ -28,13 +28,14 @@ static const uint16_t _sp_opcode[] = {
     GSENSOR_OPCODE_WAKEUP,
 };
 
-typedef struct {
-	gsensor_module_opcode_t op;
-	void *param;
+typedef struct
+{
+    gsensor_module_opcode_t op;
+    void *param;
 } gsensor_demo_msg_t;
 
-#define GSENSOR_G_INT1_PIN       GPIO_39
-static beken_thread_t  s_gsensor_demo_thread_hdl = NULL;
+#define GSENSOR_G_INT1_PIN GPIO_39
+static beken_thread_t s_gsensor_demo_thread_hdl = NULL;
 static beken_queue_t s_gsensor_demo_msg_que = NULL;
 
 static int gsensor_demo_msg(gsensor_module_opcode_t op_code);
@@ -48,26 +49,28 @@ bk_err_t gsensor_demo_lowpower_wakeup();
 
 bk_err_t gsensor_demo_send_msg(int op, void *param)
 {
-	bk_err_t ret;
-	gsensor_demo_msg_t msg;
+    bk_err_t ret;
+    gsensor_demo_msg_t msg;
 
-	msg.op = op;
-	if(param)
-		msg.param = param;
-	if (s_gsensor_demo_msg_que) {
-		ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
-		if (kNoErr != ret) {
-			return BK_FAIL;
-		}
-	}
-	return BK_OK;
+    msg.op = op;
+    if (param)
+        msg.param = param;
+    if (s_gsensor_demo_msg_que)
+    {
+        ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
+        if (kNoErr != ret)
+        {
+            return BK_FAIL;
+        }
+    }
+    return BK_OK;
 }
 
 static int gsensor_demo_check_op_code_support(unsigned short op_code)
 {
-    for(uint8_t i=0;i<sizeof(_sp_opcode)/sizeof(_sp_opcode[0]);i++)
+    for (uint8_t i = 0; i < sizeof(_sp_opcode) / sizeof(_sp_opcode[0]); i++)
     {
-        if(op_code == _sp_opcode[i])
+        if (op_code == _sp_opcode[i])
         {
             return BK_OK;
         }
@@ -80,12 +83,15 @@ static void gsensor_demo_thread(beken_thread_arg_t arg)
     bk_err_t ret = kNoErr;
 
     gsensor_demo_open();
+    os_printf("gsensor_demo_open() \r\n");
 
-    while(1) {
+    while (1)
+    {
         gsensor_demo_msg_t msg;
         ret = rtos_pop_from_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_WAIT_FOREVER);
-        if (kNoErr == ret) {
-             gsensor_demo_msg(msg.op);
+        if (kNoErr == ret)
+        {
+            gsensor_demo_msg(msg.op);
         }
     }
 }
@@ -97,9 +103,9 @@ static void gsensor_data_send_to_arithemtic_module(gsensor_notify_data_ctx_t *ct
 #endif
 }
 
-static void gsensor_callback(void *handle,gsensor_data_t *data)
+static void gsensor_callback(void *handle, gsensor_data_t *data)
 {
-    if(data->count != 0)
+    if (data->count != 0)
     {
         gsensor_notify_data_ctx_t *ctx = data;
         gsensor_data_send_to_arithemtic_module(ctx);
@@ -117,58 +123,64 @@ void gsensor_lowpower_gpio_wakeup_callback(gpio_id_t gpio_id)
 }
 bk_err_t gsensor_enter_sleep_config()
 {
-	bk_gsensor_setMode(gsensor_handle,GSENSOR_MODE_WAKEUP);
-	bk_gsensor_open(gsensor_handle);
+    bk_gsensor_setMode(gsensor_handle, GSENSOR_MODE_WAKEUP);
+    bk_gsensor_open(gsensor_handle);
 #if CONFIG_GPIO_WAKEUP_SUPPORT
-	gpio_dev_unmap(GSENSOR_G_INT1_PIN);
-	GSENSOR_D_LOGI("gsensor set WAKEUP SUCCESS!\r\n");
-	bk_gpio_register_isr(GSENSOR_G_INT1_PIN, gsensor_lowpower_gpio_wakeup_callback);
-	bk_gpio_register_wakeup_source(GSENSOR_G_INT1_PIN,GPIO_INT_TYPE_FALLING_EDGE);
-	bk_pm_wakeup_source_set(PM_WAKEUP_SOURCE_INT_GPIO, NULL);
-#endif //CONFIG_GPIO_WAKEUP_SUPPORT
-	return 0;
+    gpio_dev_unmap(GSENSOR_G_INT1_PIN);
+    GSENSOR_D_LOGI("gsensor set WAKEUP SUCCESS!\r\n");
+    bk_gpio_register_isr(GSENSOR_G_INT1_PIN, gsensor_lowpower_gpio_wakeup_callback);
+    bk_gpio_register_wakeup_source(GSENSOR_G_INT1_PIN, GPIO_INT_TYPE_FALLING_EDGE);
+    bk_pm_wakeup_source_set(PM_WAKEUP_SOURCE_INT_GPIO, NULL);
+#endif // CONFIG_GPIO_WAKEUP_SUPPORT
+    return 0;
 }
 static int gsensor_demo_msg(gsensor_module_opcode_t op_code)
 {
     GSENSOR_D_LOGI("%s ok op_code:%d\r\n", __func__, op_code);
 
-    switch(op_code)
+    switch (op_code)
     {
-        case GSENSOR_OPCODE_INIT:
+    case GSENSOR_OPCODE_INIT:
+    {
+        gsensor_handle = bk_gsensor_init("sc7a20");
+        if (gsensor_handle != NULL)
         {
-            gsensor_handle = bk_gsensor_init("sc7a20");
-            if(gsensor_handle != NULL)
-            {
-                os_printf("GSENSOR init ok, start config\r\n");
-                bk_gsensor_setMode(gsensor_handle,GSENSOR_MODE_NOMAL);
-                bk_gsensor_setDatarate(gsensor_handle,GSENSOR_DR_50HZ);
-                bk_gsensor_setDateRange(gsensor_handle,GSENSOR_RANGE_2G);
-                bk_gsensor_registerCallback(gsensor_handle,gsensor_callback);
-            }
-            else
-            {
-                GSENSOR_D_LOGI("init gsensor fail\r\n");
-            }
-        }break;
-        case GSENSOR_OPCODE_SET_NORMAL_MODE:
+            os_printf("GSENSOR init ok, start config\r\n");
+            bk_gsensor_setMode(gsensor_handle, GSENSOR_MODE_NOMAL);
+            bk_gsensor_setDatarate(gsensor_handle, GSENSOR_DR_50HZ);
+            bk_gsensor_setDateRange(gsensor_handle, GSENSOR_RANGE_2G);
+            bk_gsensor_registerCallback(gsensor_handle, gsensor_callback);
+        }
+        else
         {
-            bk_gsensor_setMode(gsensor_handle,GSENSOR_MODE_NOMAL);
-            bk_gsensor_open(gsensor_handle);
-        }break;
-        case GSENSOR_OPCODE_SET_WAKEUP_MODE:
-        {
-            bk_gsensor_setMode(gsensor_handle,GSENSOR_MODE_WAKEUP);
-            bk_gsensor_open(gsensor_handle);
-        }break;
-        case GSENSOR_OPCODE_CLOSE:
-        {
-            bk_gsensor_close(gsensor_handle);
-        }break;
-        case GSENSOR_OPCODE_LOWPOWER_WAKEUP:
-        {
-			gsensor_enter_sleep_config();
-        }break;
-        default:break;
+            GSENSOR_D_LOGI("init gsensor fail\r\n");
+        }
+    }
+    break;
+    case GSENSOR_OPCODE_SET_NORMAL_MODE:
+    {
+        bk_gsensor_setMode(gsensor_handle, GSENSOR_MODE_NOMAL);
+        bk_gsensor_open(gsensor_handle);
+    }
+    break;
+    case GSENSOR_OPCODE_SET_WAKEUP_MODE:
+    {
+        bk_gsensor_setMode(gsensor_handle, GSENSOR_MODE_WAKEUP);
+        bk_gsensor_open(gsensor_handle);
+    }
+    break;
+    case GSENSOR_OPCODE_CLOSE:
+    {
+        bk_gsensor_close(gsensor_handle);
+    }
+    break;
+    case GSENSOR_OPCODE_LOWPOWER_WAKEUP:
+    {
+        gsensor_enter_sleep_config();
+    }
+    break;
+    default:
+        break;
     }
 
     return BK_OK;
@@ -178,33 +190,37 @@ bk_err_t gsensor_demo_init(void)
 {
     uint32_t ret = 0;
 
-    if((!s_gsensor_demo_msg_que) && (!s_gsensor_demo_thread_hdl)) {
+    if ((!s_gsensor_demo_msg_que) && (!s_gsensor_demo_thread_hdl))
+    {
 
         ret = rtos_init_queue(&s_gsensor_demo_msg_que,
                               "gs_demo_msg_que",
                               sizeof(gsensor_demo_msg_t),
                               10);
-        if(ret != kNoErr) {
+        if (ret != kNoErr)
+        {
             return ret;
         }
 
 #if CONFIG_SYS_CPU0 && CONFIG_PSRAM_AS_SYS_MEMORY
         ret = rtos_create_psram_thread(&s_gsensor_demo_thread_hdl,
-                            3,
-                             "gsensor_demo",
-                             (beken_thread_function_t)gsensor_demo_thread,
-                             1536,
-                             NULL);
+                                       3,
+                                       "gsensor_demo",
+                                       (beken_thread_function_t)gsensor_demo_thread,
+                                       1536,
+                                       NULL);
 #else
         ret = rtos_create_thread(&s_gsensor_demo_thread_hdl,
-                            3,
-                             "gsensor_demo",
-                             (beken_thread_function_t)gsensor_demo_thread,
-                             1536,
-                             NULL);
+                                 3,
+                                 "gsensor_demo",
+                                 (beken_thread_function_t)gsensor_demo_thread,
+                                 1536,
+                                 NULL);
 #endif
-        if(ret != kNoErr) {
-            if(s_gsensor_demo_msg_que) {
+        if (ret != kNoErr)
+        {
+            if (s_gsensor_demo_msg_que)
+            {
                 rtos_deinit_queue(&s_gsensor_demo_msg_que);
                 s_gsensor_demo_msg_que = NULL;
             }
@@ -212,25 +228,27 @@ bk_err_t gsensor_demo_init(void)
     }
 
 #if CONFIG_GSENSOR_ARITHEMTIC_DEMO_EN
-	arithmetic_module_init();
+    arithmetic_module_init();
 #endif
     return ret;
 }
 
 void gsensor_demo_deinit(void)
 {
-    if(s_gsensor_demo_thread_hdl) {
+    if (s_gsensor_demo_thread_hdl)
+    {
         rtos_delete_thread(&s_gsensor_demo_thread_hdl);
         s_gsensor_demo_thread_hdl = NULL;
     }
 
-    if(s_gsensor_demo_msg_que) {
+    if (s_gsensor_demo_msg_que)
+    {
         rtos_deinit_queue(&s_gsensor_demo_msg_que);
         s_gsensor_demo_msg_que = NULL;
     }
 
 #if CONFIG_GSENSOR_ARITHEMTIC_DEMO_EN
-	arithmetic_module_deinit();
+    arithmetic_module_deinit();
 #endif
 }
 bk_err_t gsensor_demo_open()
@@ -239,10 +257,13 @@ bk_err_t gsensor_demo_open()
     gsensor_demo_msg_t msg;
 
     msg.op = GSENSOR_OPCODE_INIT;
+    os_printf("Send GSENSOR_OPCODE_INIT now \r\n");
 
-    if (s_gsensor_demo_msg_que) {
+    if (s_gsensor_demo_msg_que)
+    {
         ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
-        if (kNoErr != ret) {
+        if (kNoErr != ret)
+        {
             GSENSOR_D_LOGE("gsensor_demo_open push_msg fail \r\n");
             return BK_FAIL;
         }
@@ -257,9 +278,11 @@ bk_err_t gsensor_demo_close()
 
     msg.op = GSENSOR_OPCODE_CLOSE;
 
-    if (s_gsensor_demo_msg_que) {
+    if (s_gsensor_demo_msg_que)
+    {
         ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
-        if (kNoErr != ret) {
+        if (kNoErr != ret)
+        {
             GSENSOR_D_LOGE("gsensor_demo_close push_msg fail \r\n");
             return BK_FAIL;
         }
@@ -274,9 +297,11 @@ bk_err_t gsensor_demo_set_normal()
 
     msg.op = GSENSOR_OPCODE_SET_NORMAL_MODE;
 
-    if (s_gsensor_demo_msg_que) {
+    if (s_gsensor_demo_msg_que)
+    {
         ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
-        if (kNoErr != ret) {
+        if (kNoErr != ret)
+        {
             GSENSOR_D_LOGE("gsensor_demo_set_normal push_msg fail \r\n");
             return BK_FAIL;
         }
@@ -291,9 +316,11 @@ bk_err_t gsensor_demo_set_wakeup()
 
     msg.op = GSENSOR_OPCODE_SET_WAKEUP_MODE;
 
-    if (s_gsensor_demo_msg_que) {
+    if (s_gsensor_demo_msg_que)
+    {
         ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
-        if (kNoErr != ret) {
+        if (kNoErr != ret)
+        {
             GSENSOR_D_LOGE("gsensor_demo_set_wakeup push_msg fail \r\n");
             return BK_FAIL;
         }
@@ -308,13 +335,14 @@ bk_err_t gsensor_demo_lowpower_wakeup()
 
     msg.op = GSENSOR_OPCODE_LOWPOWER_WAKEUP;
 
-    if (s_gsensor_demo_msg_que) {
+    if (s_gsensor_demo_msg_que)
+    {
         ret = rtos_push_to_queue(&s_gsensor_demo_msg_que, &msg, BEKEN_NO_WAIT);
-        if (kNoErr != ret) {
+        if (kNoErr != ret)
+        {
             GSENSOR_D_LOGE("gsensor_demo_lowpower_wakeup push_msg fail \r\n");
             return BK_FAIL;
         }
     }
     return ret;
 }
-
