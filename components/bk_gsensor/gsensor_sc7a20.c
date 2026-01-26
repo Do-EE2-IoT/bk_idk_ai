@@ -246,7 +246,7 @@ static void gsensor_sc7a20_thread(beken_thread_arg_t arg)
 static void gsensor_task_init()
 {
     uint32_t ret = 0;
-
+    os_printf("gsensor_task_init \r\n");
     if ((!s_gsensor_sc7a20_event_wait) && (!s_gsensor_sc7a20_thread))
     {
 
@@ -263,6 +263,8 @@ static void gsensor_task_init()
                                        (beken_thread_function_t)gsensor_sc7a20_thread,
                                        1024,
                                        NULL);
+
+        os_printf("SC7a20 sensor: create sc7a20 task on psram \r\n");
 #else
         ret = rtos_create_thread(&s_gsensor_sc7a20_thread,
                                  5,
@@ -270,9 +272,12 @@ static void gsensor_task_init()
                                  (beken_thread_function_t)gsensor_sc7a20_thread,
                                  1024,
                                  NULL);
+
+        os_printf("SC7a20 sensor: create sc7a20 task on ram \r\n");
 #endif
         if (ret != kNoErr)
         {
+            os_printf("SC7a20 sensor: ???? \r\n");
             if (s_gsensor_sc7a20_event_wait)
             {
                 rtos_deinit_semaphore(&s_gsensor_sc7a20_event_wait);
