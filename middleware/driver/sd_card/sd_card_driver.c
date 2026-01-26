@@ -1045,7 +1045,7 @@ bk_err_t bk_sd_card_init(void)
 	}
 
 #if CONFIG_SDIO_V2P0
-	sdio_cfg.clock_freq = SDIO_HOST_CLK_20M;
+	sdio_cfg.clock_freq = SDIO_HOST_CLK_80M;
 	SD_CARD_LOGW("SDIO_HOST_CLK_100K  CONFIG_SDIO_V2P0\r\n");
 #else
 	sdio_cfg.clock_freq = CONFIG_SDIO_HOST_DEFAULT_CLOCK_FREQ;
