@@ -234,12 +234,13 @@ static void gsensor_sc7a20_thread(beken_thread_arg_t arg)
 
     while (1)
     {
-        os_printf("ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER); \r\n");
-        ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER);
-        if (kNoErr == ret)
-        {
-            gsensor_sc7a20_event_handler(runmode);
-        }
+        // os_printf("ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER); \r\n");
+        // ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER);
+        // if (kNoErr == ret)
+        // {
+        gsensor_sc7a20_event_handler(runmode);
+        rtos_delay_milliseconds(1000);
+        // }
     }
 }
 
