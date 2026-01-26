@@ -194,10 +194,10 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
 
         sc7a20_i2c_read(SL_SC7A20_FIFO_SRC_REG, 1, &fifodepth);
         // os_printf("gsensor fifo:%d\r\n", fifodepth); fifo depth = 32, tôi đọc ở đây ra 32
-        if ((fifodepth & 0x40) == 0x40)
-            fifodepth = 32;
-        else
-            fifodepth = fifodepth & 0x1f;
+        // if ((fifodepth & 0x40) == 0x40)
+        //     fifodepth = 32;
+        // else
+        //     fifodepth = fifodepth & 0x1f;
         //  os_printf("gsensor fifo:%d\r\n",fifodepth);
         if (fifodepth == 0)
             return;
