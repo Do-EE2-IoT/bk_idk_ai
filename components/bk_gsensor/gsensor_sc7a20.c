@@ -188,6 +188,7 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
 {
     if (t_runmode == GSENSOR_MODE_NOMAL)
     {
+        os_printf("GSENSOR MODE NORMAL \r\n");
         unsigned char fifodepth;
         unsigned char sc7a20_data[6];
 
@@ -221,10 +222,13 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
     }
     else if (t_runmode == GSENSOR_MODE_WAKEUP)
     {
+        os_printf("GSENSOR MODE WAKEUP\r\n");
         gsensor_data_t nulld;
         nulld.count = 0;
         if (datacb)
             datacb((void *)&gs_sc7a20, &nulld);
+    }else{
+        os_printf("GSENSOR MODE UNKNOWN\r\n");
     }
 }
 
