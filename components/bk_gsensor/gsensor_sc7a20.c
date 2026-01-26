@@ -518,25 +518,25 @@ static int sc7a20_init(void)
     bk_i2c_init(GSENSOR_I2C_ID, &i2c_cfg);
 
     // Scan all I2C addresses
-    SC7A20_LOGW("Starting I2C address scan...\r\n");
-    for (uint8_t addr = 0x01; addr < 0x7F; addr++)
-    {
-        i2c_transfer_t scan_trx = {0};
-        scan_trx.i2c_id = GSENSOR_I2C_ID;
-        scan_trx.device_addr_mode = 0;
-        scan_trx.device_addr = addr;
-        scan_trx.reg_addr_mode = 0;
-        scan_trx.reg_addr = 0x00;
-        uint8_t scan_data = 0;
-        scan_trx.data = &scan_data;
-        scan_trx.data_len = 1;
+    // SC7A20_LOGW("Starting I2C address scan...\r\n");
+    // for (uint8_t addr = 0x01; addr < 0x7F; addr++)
+    // {
+    //     i2c_transfer_t scan_trx = {0};
+    //     scan_trx.i2c_id = GSENSOR_I2C_ID;
+    //     scan_trx.device_addr_mode = 0;
+    //     scan_trx.device_addr = addr;
+    //     scan_trx.reg_addr_mode = 0;
+    //     scan_trx.reg_addr = 0x00;
+    //     uint8_t scan_data = 0;
+    //     scan_trx.data = &scan_data;
+    //     scan_trx.data_len = 1;
 
-        if (gsensor_i2c_read(&scan_trx) == BK_OK)
-        {
-            SC7A20_LOGW("Found I2C device at address: 0x%02X\r\n", addr);
-        }
-    }
-    SC7A20_LOGW("I2C address scan completed\r\n");
+    //     if (gsensor_i2c_read(&scan_trx) == BK_OK )
+    //     {
+    //         SC7A20_LOGW("Found I2C device at address: 0x%02X\r\n", addr);
+    //     }
+    // }
+    // SC7A20_LOGW("I2C address scan completed\r\n");
 
     // bsp_i2c_init(GSENSOR_I2C_ID,GSENSOR_I2C_SCL_PIN,GSENSOR_I2C_SDA_PIN,&i2c_cfg);
 
