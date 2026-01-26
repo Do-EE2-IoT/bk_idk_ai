@@ -188,17 +188,17 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
 {
     if (t_runmode == GSENSOR_MODE_NOMAL)
     {
-        os_printf("GSENSOR MODE NORMAL \r\n");
+        // os_printf("GSENSOR MODE NORMAL \r\n");
         unsigned char fifodepth;
         unsigned char sc7a20_data[6];
 
         sc7a20_i2c_read(SL_SC7A20_FIFO_SRC_REG, 1, &fifodepth);
-        os_printf("gsensor fifo:%d\r\n", fifodepth);
+        // os_printf("gsensor fifo:%d\r\n", fifodepth); fifo depth = 32, tôi đọc ở đây ra 32
         if ((fifodepth & 0x40) == 0x40)
             fifodepth = 32;
         else
             fifodepth = fifodepth & 0x1f;
-      //  os_printf("gsensor fifo:%d\r\n",fifodepth);
+        //  os_printf("gsensor fifo:%d\r\n",fifodepth);
         if (fifodepth == 0)
             return;
 
@@ -209,6 +209,7 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
             return;
         }
         dat->count = fifodepth;
+        os_printf("Data count = %d \r\n", dat->count);
         for (int i = 0; i < fifodepth; i++)
         {
             sc7a20_i2c_read(SL_SC7A20_DATA_OUT, 6, &sc7a20_data[0]);
@@ -228,7 +229,9 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
         nulld.count = 0;
         if (datacb)
             datacb((void *)&gs_sc7a20, &nulld);
-    }else{
+    }
+    else
+    {
         os_printf("GSENSOR MODE UNKNOWN\r\n");
     }
 }
