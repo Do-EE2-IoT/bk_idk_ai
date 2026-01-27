@@ -84,3 +84,12 @@ int bk_gsensor_registerCallback(void *handle,gsensor_cb cb)
     return 0;
 }
 
+int bk_gsensor_read_xyz(void *handle, short *x, short *y, short *z)
+{
+    if(handle == 0) return -1;
+    gsensor_device_t *dev = (gsensor_device_t*)handle;
+    if(dev->read_xyz)
+        return dev->read_xyz(x, y, z);
+    return -1;
+}
+

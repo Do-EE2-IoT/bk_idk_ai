@@ -170,6 +170,7 @@ static int sc7a20_setDatarate(gsensor_dr_t dr);
 static int sc7a20_setMode(gsensor_mode_t mode);
 static int sc7a20_setDataRange(gsensor_range_t rg);
 static int sc7a20_registerCallback(gsensor_cb cb);
+static int sc7a20_read_xyz(short *x, short *y, short *z);
 
 const gsensor_device_t gs_sc7a20 =
     {
@@ -182,6 +183,7 @@ const gsensor_device_t gs_sc7a20 =
         .setMode = sc7a20_setMode,
         .setDataRange = sc7a20_setDataRange,
         .registerCallback = sc7a20_registerCallback,
+        .read_xyz = sc7a20_read_xyz,
 };
 
 static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
@@ -193,12 +195,11 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
         unsigned char sc7a20_data[6];
 
         sc7a20_i2c_read(SL_SC7A20_FIFO_SRC_REG, 1, &fifodepth);
-        // os_printf("gsensor fifo:%d\r\n", fifodepth); fifo depth = 32, tôi đọc ở đây ra 32
-        // if ((fifodepth & 0x40) == 0x40)
-        //     fifodepth = 32;
-        // else
-        //     fifodepth = fifodepth & 0x1f;
-        //  os_printf("gsensor fifo:%d\r\n",fifodepth);
+        //os_printf("gsensor fifo:%d\r\n", fifodepth); 
+        if ((fifodepth & 0x40) == 0x40)
+            fifodepth = 32;
+        else
+            fifodepth = fifodepth & 0x1f;
         if (fifodepth == 0)
             return;
 
@@ -209,14 +210,14 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
             return;
         }
         dat->count = fifodepth;
-        //os_printf("Data count = %d \r\n", dat->count);
+        // os_printf("Data count = %d \r\n", dat->count);
         for (int i = 0; i < fifodepth; i++)
         {
             sc7a20_i2c_read(SL_SC7A20_DATA_OUT, 6, &sc7a20_data[0]);
             dat->xyz[i].x = (short)((sc7a20_data[1] << 8) | sc7a20_data[0]);
             dat->xyz[i].y = (short)((sc7a20_data[3] << 8) | sc7a20_data[2]);
             dat->xyz[i].z = (short)((sc7a20_data[5] << 8) | sc7a20_data[4]);
-           // os_printf("xyz:%d,%d,%d\r\n", dat->xyz[i].x, dat->xyz[i].y, dat->xyz[i].z);
+            //os_printf("xyz:%d,%d,%d\r\n", dat->xyz[i].x, dat->xyz[i].y, dat->xyz[i].z);
         }
         if (datacb)
             datacb((void *)&gs_sc7a20, dat);
@@ -242,13 +243,13 @@ static void gsensor_sc7a20_thread(beken_thread_arg_t arg)
 
     while (1)
     {
-        // os_printf("ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER); \r\n");
-        // ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER);
-        // if (kNoErr == ret)
-        // {
-        gsensor_sc7a20_event_handler(runmode);
-        rtos_delay_milliseconds(1000);
-        // }
+        //os_printf("ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER); \r\n");
+        ret = rtos_get_semaphore(&s_gsensor_sc7a20_event_wait, BEKEN_WAIT_FOREVER);
+        if (kNoErr == ret)
+        {
+            gsensor_sc7a20_event_handler(runmode);
+            // rtos_delay_milliseconds(1000);
+        }
     }
 }
 
@@ -314,7 +315,7 @@ static void gsensor_task_deinit()
 static void gsensor_check_timer_handler(gsensor_timer_handle timer, void *uarg)
 {
     rtos_set_semaphore(&s_gsensor_sc7a20_event_wait);
-    os_printf("rtos_set_semaphore(&s_gsensor_sc7a20_event_wait); 302 \r\n");
+    // os_printf("rtos_set_semaphore(&s_gsensor_sc7a20_event_wait); 302 \r\n");
 }
 
 static void gsensor_timer_handler(void *Larg, void *Rarg)
@@ -764,6 +765,37 @@ static int sc7a20_setDataRange(gsensor_range_t rg)
             break;
         }
     }
+    return 0;
+}
+
+static int sc7a20_read_xyz(short *x, short *y, short *z)
+{
+    unsigned char sc7a20_data[6];
+
+    if (!is_running)
+    {
+        SC7A20_LOGE("sc7a20_read_xyz: sensor not running\r\n");
+        return -1;
+    }
+
+    if (x == NULL || y == NULL || z == NULL)
+    {
+        SC7A20_LOGE("sc7a20_read_xyz: null pointer\r\n");
+        return -1;
+    }
+
+    // Read 6 bytes from sensor (X_L, X_H, Y_L, Y_H, Z_L, Z_H)
+    if (sc7a20_i2c_read(SL_SC7A20_DATA_OUT, 6, &sc7a20_data[0]) != 0)
+    {
+        SC7A20_LOGE("sc7a20_read_xyz: i2c read failed\r\n");
+        return -1;
+    }
+
+    // Convert from little-endian to short
+    *x = (short)((sc7a20_data[1] << 8) | sc7a20_data[0]);
+    *y = (short)((sc7a20_data[3] << 8) | sc7a20_data[2]);
+    *z = (short)((sc7a20_data[5] << 8) | sc7a20_data[4]);
+
     return 0;
 }
 

@@ -65,6 +65,7 @@ typedef struct{
     int (*setMode)(gsensor_mode_t mode);
     int (*setDataRange)(gsensor_range_t rg);
     int (*registerCallback)(gsensor_cb cb);
+    int (*read_xyz)(short *x, short *y, short *z);
 }gsensor_device_t;
 
 void* bk_gsensor_init(const char *devname);
@@ -75,6 +76,7 @@ int bk_gsensor_setDatarate(void *handle,gsensor_dr_t dr);
 int bk_gsensor_setMode(void *handle,gsensor_mode_t mode);
 int bk_gsensor_setDateRange(void *handle,gsensor_range_t rg);
 int bk_gsensor_registerCallback(void *handle,gsensor_cb cb);
+int bk_gsensor_read_xyz(void *handle, short *x, short *y, short *z);
 
 #endif //__BSP_GSENSOR_H__
 

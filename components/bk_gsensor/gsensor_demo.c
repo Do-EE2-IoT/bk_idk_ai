@@ -17,7 +17,7 @@
 #define GSENSOR_D_LOGE(...) BK_LOGE(GSENSOR_D_TAG, ##__VA_ARGS__)
 #define GSENSOR_D_LOGD(...) BK_LOGD(GSENSOR_D_TAG, ##__VA_ARGS__)
 
-static void *gsensor_handle;
+void *gsensor_handle;
 
 static const uint16_t _sp_opcode[] = {
     GSENSOR_OPCODE_INIT,
