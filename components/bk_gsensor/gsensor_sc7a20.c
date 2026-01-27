@@ -209,14 +209,14 @@ static void gsensor_sc7a20_event_handler(gsensor_mode_t t_runmode)
             return;
         }
         dat->count = fifodepth;
-        os_printf("Data count = %d \r\n", dat->count);
+        //os_printf("Data count = %d \r\n", dat->count);
         for (int i = 0; i < fifodepth; i++)
         {
             sc7a20_i2c_read(SL_SC7A20_DATA_OUT, 6, &sc7a20_data[0]);
             dat->xyz[i].x = (short)((sc7a20_data[1] << 8) | sc7a20_data[0]);
             dat->xyz[i].y = (short)((sc7a20_data[3] << 8) | sc7a20_data[2]);
             dat->xyz[i].z = (short)((sc7a20_data[5] << 8) | sc7a20_data[4]);
-            os_printf("xyz:%d,%d,%d\r\n", dat->xyz[i].x, dat->xyz[i].y, dat->xyz[i].z);
+           // os_printf("xyz:%d,%d,%d\r\n", dat->xyz[i].x, dat->xyz[i].y, dat->xyz[i].z);
         }
         if (datacb)
             datacb((void *)&gs_sc7a20, dat);
