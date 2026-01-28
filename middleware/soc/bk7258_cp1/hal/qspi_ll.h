@@ -27,13 +27,13 @@ extern "C"
 #define QSPI_LL_REG_BASE(_qspi_unit_id) (SOC_QSPI0_REG_BASE + (0x20000 * _qspi_unit_id))
 #define QSPI_DATA_LL_REG_BASE(_qspi_unit_id) (SOC_QSPI0_DATA_BASE + (0x4000000 * _qspi_unit_id))
 
-	// #define QSPI0_LL_CLK_PIN     GPIO_22
-	// #define QSPI0_LL_CSN_PIN     GPIO_23
-	// #define QSPI0_LL_IO0_PIN     GPIO_24
+	#define QSPI0_LL_CLK_PIN     GPIO_22
+	#define QSPI0_LL_CSN_PIN     GPIO_23
+	#define QSPI0_LL_IO0_PIN     GPIO_24
 
-#define QSPI0_LL_CLK_PIN GPIO_14
-#define QSPI0_LL_CSN_PIN GPIO_15
-#define QSPI0_LL_IO0_PIN GPIO_16
+// #define QSPI0_LL_CLK_PIN GPIO_14
+// #define QSPI0_LL_CSN_PIN GPIO_15
+// #define QSPI0_LL_IO0_PIN GPIO_16
 #define QSPI0_LL_IO1_PIN GPIO_25
 #define QSPI0_LL_IO2_PIN GPIO_26
 #define QSPI0_LL_IO3_PIN GPIO_27
