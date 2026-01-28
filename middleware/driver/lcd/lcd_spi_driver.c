@@ -158,6 +158,7 @@ static void lcd_spi_device_gpio_init(uint8_t id)
         rtos_delay_milliseconds(120);
     }
 #else
+    os_printf("LCD SPI RESET PIN %d & DC PIN %d \r\n", LCD_SPI_RESET_PIN, LCD_SPI_DC_PIN);
     BK_LOG_ON_ERR(gpio_dev_unmap(LCD_SPI_RESET_PIN));
     BK_LOG_ON_ERR(gpio_dev_unmap(LCD_SPI_DC_PIN));
     bk_gpio_set_config(LCD_SPI_RESET_PIN, &config);
