@@ -53,54 +53,63 @@
 #endif
 
 #if CONFIG_SOC_BK7256XX
-#define LCD_BACKLIGHT_PWM_RGB       PWM_ID_1
-#define LCD_BACKLIGHT_PWM_QSPI      PWM_ID_2
-#define LCD_BACKLIGHT_GPIO_RGB      GPIO_7
-#define LCD_BACKLIGHT_GPIO_QSPI     GPIO_8
+#define LCD_BACKLIGHT_PWM_RGB PWM_ID_1
+#define LCD_BACKLIGHT_PWM_QSPI PWM_ID_2
+#define LCD_BACKLIGHT_GPIO_RGB GPIO_7
+#define LCD_BACKLIGHT_GPIO_QSPI GPIO_8
 #endif
 
 #if CONFIG_SOC_BK7236XX
-#define LCD_BACKLIGHT_PWM           PWM_ID_1
+#define LCD_BACKLIGHT_PWM PWM_ID_1
 #ifdef CONFIG_LCD_BACKLIGHT_GPIO
-#define LCD_BACKLIGHT_GPIO          CONFIG_LCD_BACKLIGHT_GPIO
+#define LCD_BACKLIGHT_GPIO CONFIG_LCD_BACKLIGHT_GPIO
 #else
-#define LCD_BACKLIGHT_GPIO          GPIO_7
+#define LCD_BACKLIGHT_GPIO GPIO_7
 #endif
 #endif
 
-#define IO_FUNCTION_ENABLE(pin, func)   \
-	do {                                \
-		gpio_dev_unmap(pin);            \
-		gpio_dev_map(pin, func);        \
-		bk_gpio_enable_output(pin); 	\
-		bk_gpio_set_capacity(pin,GPIO_DRIVER_CAPACITY_1);	\
+#define IO_FUNCTION_ENABLE(pin, func)                      \
+	do                                                     \
+	{                                                      \
+		gpio_dev_unmap(pin);                               \
+		gpio_dev_map(pin, func);                           \
+		bk_gpio_enable_output(pin);                        \
+		bk_gpio_set_capacity(pin, GPIO_DRIVER_CAPACITY_1); \
 	} while (0)
 
-#define IO_FUNCTION_ENABLE_I8080(pin, func)   \
-	do {                                \
-		gpio_dev_unmap(pin);            \
-		gpio_dev_map(pin, func);        \
-		bk_gpio_enable_output(pin);     \
-		bk_gpio_set_capacity(pin,GPIO_DRIVER_CAPACITY_3);    \
+#define IO_FUNCTION_ENABLE_I8080(pin, func)                \
+	do                                                     \
+	{                                                      \
+		gpio_dev_unmap(pin);                               \
+		gpio_dev_map(pin, func);                           \
+		bk_gpio_enable_output(pin);                        \
+		bk_gpio_set_capacity(pin, GPIO_DRIVER_CAPACITY_3); \
 	} while (0)
 
-//set high impedance
-#define IO_FUNCTION_UNMAP(pin)   \
-        do {                                \
-            gpio_dev_unmap(pin);            \
-        } while (0)
+// set high impedance
+#define IO_FUNCTION_UNMAP(pin) \
+	do                         \
+	{                          \
+		gpio_dev_unmap(pin);   \
+	} while (0)
 
-#define LCD_RETURN_ON_NOT_INIT() do {\
-		if (!s_lcd_driver_is_init) {\
-			return BK_ERR_LCD_NOT_INIT;\
-		}\
-	} while(0)
-#define BK_RETURN_ON_NULL(_x) do {\
-	if (!(_x)) {\
-		BK_LOGE(ERR_TAG, "Null %s\n", __FUNCTION__);\
-		return BK_ERR_NULL_PARAM;\
-	}\
-} while(0)
+#define LCD_RETURN_ON_NOT_INIT()        \
+	do                                  \
+	{                                   \
+		if (!s_lcd_driver_is_init)      \
+		{                               \
+			return BK_ERR_LCD_NOT_INIT; \
+		}                               \
+	} while (0)
+#define BK_RETURN_ON_NULL(_x)                            \
+	do                                                   \
+	{                                                    \
+		if (!(_x))                                       \
+		{                                                \
+			BK_LOGE(ERR_TAG, "Null %s\n", __FUNCTION__); \
+			return BK_ERR_NULL_PARAM;                    \
+		}                                                \
+	} while (0)
 
 static bool s_lcd_driver_is_init = false;
 
@@ -113,7 +122,7 @@ extern u64 riscv_get_mtimer(void);
 
 typedef struct
 {
-#if (USE_LCD_REGISTER_CALLBACKS == 1)  //register callback
+#if (USE_LCD_REGISTER_CALLBACKS == 1) // register callback
 	lcd_isr_t lcd_8080_frame_start_handler;
 	lcd_isr_t lcd_8080_frame_end_handler;
 	lcd_isr_t lcd_rgb_frame_end_handler;
@@ -121,7 +130,7 @@ typedef struct
 	lcd_isr_t lcd_rgb_de_handler;
 	lcd_isr_t lcd_rgb_frame_interval_handler;
 #endif
-	const lcd_device_t device;  /**< lcd device config */
+	const lcd_device_t device; /**< lcd device config */
 } lcd_driver_t;
 
 static lcd_driver_t s_lcd = {0};
@@ -138,7 +147,7 @@ uint32_t get_lcd_devices_num(void)
 	return devices_size;
 }
 
-const lcd_device_t * get_lcd_device_by_name(char * name)
+const lcd_device_t *get_lcd_device_by_name(char *name)
 {
 	uint32_t i;
 
@@ -194,82 +203,83 @@ void bk_lcd_set_devices_list(const lcd_device_t **list, uint16_t size)
 	devices_size = size;
 }
 
-
 int32_t lcd_driver_get_spi_gpio(LCD_SPI_GPIO_TYPE_E gpio_type)
 {
-    int32_t gpio_value = 0;
-    switch(gpio_type)
-    {
-        case SPI_GPIO_CLK:
-            if(s_lcd.device.id == LCD_DEVICE_ST7701S)   //480X480
-            {
-                #if CONFIG_SOC_BK7256XX
-                gpio_value = GPIO_35;
-                #elif CONFIG_SOC_BK7236XX
-                gpio_value = GPIO_0;
-                #endif
-            }
-            else if (s_lcd.device.id == LCD_DEVICE_NT35510) //custom
-            {
-                gpio_value = GPIO_2;
-            }
-			else 
-            {
-#if CONFIG_SOC_BK7256
-				gpio_value = GPIO_9;
-#else   //bk7258
-				gpio_value = GPIO_0;
+	int32_t gpio_value = 0;
+	switch (gpio_type)
+	{
+	case SPI_GPIO_CLK:
+		if (s_lcd.device.id == LCD_DEVICE_ST7701S) // 480X480
+		{
+#if CONFIG_SOC_BK7256XX
+			gpio_value = GPIO_35;
+#elif CONFIG_SOC_BK7236XX
+			gpio_value = GPIO_0;
 #endif
-           	}
-            break;
-        case SPI_GPIO_CSX:
-            if(s_lcd.device.id == LCD_DEVICE_ST7701S)
-            {
-                #if CONFIG_SOC_BK7256XX
-                gpio_value = GPIO_34;
-                #elif CONFIG_SOC_BK7236XX
-                gpio_value = GPIO_12;
-                #endif
-            }
-            else if (s_lcd.device.id == LCD_DEVICE_NT35510) //custom
-            {
-                gpio_value = GPIO_3;
-            }
-            else
-            {
-                gpio_value = GPIO_12;
-            }
-            break;
-        case SPI_GPIO_SDA:
-            if(s_lcd.device.id == LCD_DEVICE_ST7701S) {
-                #if CONFIG_SOC_BK7256XX
-                gpio_value = GPIO_36;
-                #elif CONFIG_SOC_BK7236XX
-                gpio_value = GPIO_1;
-                #endif
-            } else if (s_lcd.device.id == LCD_DEVICE_NT35510) //custom
-				gpio_value = GPIO_4;
-            else
-			{
+		}
+		else if (s_lcd.device.id == LCD_DEVICE_NT35510) // custom
+		{
+			gpio_value = GPIO_2;
+		}
+		else
+		{
 #if CONFIG_SOC_BK7256
-				gpio_value = GPIO_8;
+			gpio_value = GPIO_9;
+#else // bk7258
+			gpio_value = GPIO_0;
+#endif
+		}
+		break;
+	case SPI_GPIO_CSX:
+		if (s_lcd.device.id == LCD_DEVICE_ST7701S)
+		{
+#if CONFIG_SOC_BK7256XX
+			gpio_value = GPIO_34;
+#elif CONFIG_SOC_BK7236XX
+			gpio_value = GPIO_12;
+#endif
+		}
+		else if (s_lcd.device.id == LCD_DEVICE_NT35510) // custom
+		{
+			gpio_value = GPIO_3;
+		}
+		else
+		{
+			gpio_value = GPIO_12;
+		}
+		break;
+	case SPI_GPIO_SDA:
+		if (s_lcd.device.id == LCD_DEVICE_ST7701S)
+		{
+#if CONFIG_SOC_BK7256XX
+			gpio_value = GPIO_36;
+#elif CONFIG_SOC_BK7236XX
+			gpio_value = GPIO_1;
+#endif
+		}
+		else if (s_lcd.device.id == LCD_DEVICE_NT35510) // custom
+			gpio_value = GPIO_4;
+		else
+		{
+#if CONFIG_SOC_BK7256
+			gpio_value = GPIO_8;
 #else
-				gpio_value = GPIO_1;
+			gpio_value = GPIO_1;
 #endif
-			}
-            break;
-        case SPI_GPIO_RST:
-            if(s_lcd.device.id == LCD_DEVICE_ST7701S)
-                gpio_value = GPIO_15;
-            else
-                gpio_value = GPIO_6;
-            break;
-        default:
-            LOGE("%s can't support this gpio type:%d\r\n", __FUNCTION__, __LINE__);
-            break;
-    }
+		}
+		break;
+	case SPI_GPIO_RST:
+		if (s_lcd.device.id == LCD_DEVICE_ST7701S)
+			gpio_value = GPIO_15;
+		else
+			gpio_value = GPIO_6;
+		break;
+	default:
+		LOGE("%s can't support this gpio type:%d\r\n", __FUNCTION__, __LINE__);
+		break;
+	}
 
-    return gpio_value;
+	return gpio_value;
 }
 
 bk_err_t lcd_mcu_gpio_init(void)
@@ -285,8 +295,8 @@ bk_err_t lcd_mcu_gpio_init(void)
 	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D6_PIN, LCD_MCU_D6_FUNC);
 	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D7_PIN, LCD_MCU_D7_FUNC);
 #if CONFIG_SOC_BK7236XX
-	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D8_PIN , LCD_MCU_D8_FUNC );
-	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D9_PIN , LCD_MCU_D9_FUNC );
+	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D8_PIN, LCD_MCU_D8_FUNC);
+	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D9_PIN, LCD_MCU_D9_FUNC);
 	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D10_PIN, LCD_MCU_D10_FUNC);
 	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D11_PIN, LCD_MCU_D11_FUNC);
 	IO_FUNCTION_ENABLE_I8080(LCD_MCU_D12_PIN, LCD_MCU_D12_FUNC);
@@ -305,7 +315,6 @@ bk_err_t lcd_mcu_gpio_init(void)
 	return BK_OK;
 }
 
-
 static bk_err_t lcd_rgb_gpio_init(void)
 {
 	LOGI("%s\n", __func__);
@@ -319,7 +328,7 @@ static bk_err_t lcd_rgb_gpio_init(void)
 	IO_FUNCTION_ENABLE(LCD_RGB_R5_PIN, LCD_RGB_R5_FUNC);
 	IO_FUNCTION_ENABLE(LCD_RGB_R6_PIN, LCD_RGB_R6_FUNC);
 	IO_FUNCTION_ENABLE(LCD_RGB_R7_PIN, LCD_RGB_R7_FUNC);
-	
+
 #if CONFIG_SOC_BK7236XX
 	IO_FUNCTION_ENABLE(LCD_RGB_G0_PIN, LCD_RGB_G0_FUNC);
 	IO_FUNCTION_ENABLE(LCD_RGB_G1_PIN, LCD_RGB_G1_FUNC);
@@ -335,7 +344,7 @@ static bk_err_t lcd_rgb_gpio_init(void)
 	IO_FUNCTION_ENABLE(LCD_RGB_B0_PIN, LCD_RGB_B0_FUNC);
 	IO_FUNCTION_ENABLE(LCD_RGB_B1_PIN, LCD_RGB_B1_FUNC);
 	IO_FUNCTION_ENABLE(LCD_RGB_B2_PIN, LCD_RGB_B2_FUNC);
-	
+
 #endif
 	IO_FUNCTION_ENABLE(LCD_RGB_B3_PIN, LCD_RGB_B3_FUNC);
 	IO_FUNCTION_ENABLE(LCD_RGB_B4_PIN, LCD_RGB_B4_FUNC);
@@ -354,123 +363,142 @@ static bk_err_t lcd_rgb_gpio_init(void)
 
 bk_err_t bk_lcd_rgb_io_deinit(void)
 {
-    IO_FUNCTION_UNMAP(LCD_SPI_CLK_GPIO);
-    IO_FUNCTION_UNMAP(LCD_SPI_CSX_GPIO);
-    IO_FUNCTION_UNMAP(LCD_SPI_SDA_GPIO);
-    IO_FUNCTION_UNMAP(LCD_SPI_RST);
-    return BK_OK;
+	IO_FUNCTION_UNMAP(LCD_SPI_CLK_GPIO);
+	IO_FUNCTION_UNMAP(LCD_SPI_CSX_GPIO);
+	IO_FUNCTION_UNMAP(LCD_SPI_SDA_GPIO);
+	IO_FUNCTION_UNMAP(LCD_SPI_RST);
+	return BK_OK;
 }
-
 
 bk_err_t lcd_driver_backlight_open(void)
 {
 #if (CONFIG_SOC_BK7256XX)
 #if CONFIG_PWM
-    BK_LOG_ON_ERR(bk_pwm_driver_init());
-    pwm_init_config_t config = {0};
-    config.period_cycle = 100;
-    config.duty_cycle = 100;
-    config.psc = 25;
-    if (s_lcd.device.type == LCD_TYPE_QSPI) {
-        BK_LOG_ON_ERR(bk_pwm_init(LCD_BACKLIGHT_PWM_QSPI, &config));
-        BK_LOG_ON_ERR(bk_pwm_start(LCD_BACKLIGHT_PWM_QSPI));
-    } else {
-        BK_LOG_ON_ERR(bk_pwm_init(LCD_BACKLIGHT_PWM_RGB, &config));
-        BK_LOG_ON_ERR(bk_pwm_start(LCD_BACKLIGHT_PWM_RGB));
-    }
+	BK_LOG_ON_ERR(bk_pwm_driver_init());
+	pwm_init_config_t config = {0};
+	config.period_cycle = 100;
+	config.duty_cycle = 100;
+	config.psc = 25;
+	if (s_lcd.device.type == LCD_TYPE_QSPI)
+	{
+		BK_LOG_ON_ERR(bk_pwm_init(LCD_BACKLIGHT_PWM_QSPI, &config));
+		BK_LOG_ON_ERR(bk_pwm_start(LCD_BACKLIGHT_PWM_QSPI));
+		LOGW("CONFIG_SOC_BK7256XX LCD_TYPE_QSPI LCD_BACKLIGHT_PWM_QSPI %d \r\n", LCD_BACKLIGHT_PWM_QSPI);
+	}
+	else
+	{
+		BK_LOG_ON_ERR(bk_pwm_init(LCD_BACKLIGHT_PWM_RGB, &config));
+		BK_LOG_ON_ERR(bk_pwm_start(LCD_BACKLIGHT_PWM_RGB));
+		LOGW(" CONFIG_SOC_BK7256XX LCD_TYPE_QSPI LCD_BACKLIGHT_PWM_RGB %d \r\n", LCD_BACKLIGHT_PWM_RGB);
+	}
 #else
-    if (s_lcd.device.type == LCD_TYPE_QSPI) {
-        gpio_dev_unmap(LCD_BACKLIGHT_GPIO_QSPI);
-        BK_LOG_ON_ERR(bk_gpio_enable_output(LCD_BACKLIGHT_GPIO_QSPI));
-        BK_LOG_ON_ERR(bk_gpio_pull_up(LCD_BACKLIGHT_GPIO_QSPI));
-        bk_gpio_set_output_high(LCD_BACKLIGHT_GPIO_QSPI);
-    } else {
-        gpio_dev_unmap(LCD_BACKLIGHT_GPIO_RGB);
-        BK_LOG_ON_ERR(bk_gpio_enable_output(LCD_BACKLIGHT_GPIO_RGB));
-        BK_LOG_ON_ERR(bk_gpio_pull_up(LCD_BACKLIGHT_GPIO_RGB));
-        bk_gpio_set_output_high(LCD_BACKLIGHT_GPIO_RGB);
-    }
+	if (s_lcd.device.type == LCD_TYPE_QSPI)
+	{
+		gpio_dev_unmap(LCD_BACKLIGHT_GPIO_QSPI);
+		BK_LOG_ON_ERR(bk_gpio_enable_output(LCD_BACKLIGHT_GPIO_QSPI));
+		BK_LOG_ON_ERR(bk_gpio_pull_up(LCD_BACKLIGHT_GPIO_QSPI));
+		bk_gpio_set_output_high(LCD_BACKLIGHT_GPIO_QSPI);
+		LOGW(" CONFIG_SOC_BK7256XX LCD_TYPE_QSPI LCD_BACKLIGHT_GPIO_QSPI %d \r\n", LCD_BACKLIGHT_GPIO_QSPI);
+	}
+	else
+	{
+		gpio_dev_unmap(LCD_BACKLIGHT_GPIO_RGB);
+		BK_LOG_ON_ERR(bk_gpio_enable_output(LCD_BACKLIGHT_GPIO_RGB));
+		BK_LOG_ON_ERR(bk_gpio_pull_up(LCD_BACKLIGHT_GPIO_RGB));
+		bk_gpio_set_output_high(LCD_BACKLIGHT_GPIO_RGB);
+		LOGW(" CONFIG_SOC_BK7256XX LCD_TYPE_QSPI LCD_BACKLIGHT_GPIO_RGB %d \r\n", LCD_BACKLIGHT_PWM_RGB);
+	}
 #endif
 #elif (CONFIG_SOC_BK7236XX)
 #if CONFIG_PWM
-    BK_LOG_ON_ERR(bk_pwm_driver_init());
-    pwm_init_config_t config = {0};
-    config.period_cycle = 100;
-    config.duty_cycle = 100;
-    config.psc = 25;
-    BK_LOG_ON_ERR(bk_pwm_init(LCD_BACKLIGHT_PWM, &config));
-    BK_LOG_ON_ERR(bk_pwm_start(LCD_BACKLIGHT_PWM));
+	BK_LOG_ON_ERR(bk_pwm_driver_init());
+	pwm_init_config_t config = {0};
+	config.period_cycle = 100;
+	config.duty_cycle = 100;
+	config.psc = 25;
+	BK_LOG_ON_ERR(bk_pwm_init(LCD_BACKLIGHT_PWM, &config));
+	BK_LOG_ON_ERR(bk_pwm_start(LCD_BACKLIGHT_PWM));
+	LOGW(" CONFIG_SOC_BK7236XX LCD_TYPE_QSPI CONFIG_PWM %d \r\n", LCD_BACKLIGHT_PWM_RGB);
 #else
-    gpio_dev_unmap(LCD_BACKLIGHT_GPIO);
-    BK_LOG_ON_ERR(bk_gpio_enable_output(LCD_BACKLIGHT_GPIO));
-    BK_LOG_ON_ERR(bk_gpio_pull_up(LCD_BACKLIGHT_GPIO));
-    bk_gpio_set_output_high(LCD_BACKLIGHT_GPIO);
+	gpio_dev_unmap(LCD_BACKLIGHT_GPIO);
+	BK_LOG_ON_ERR(bk_gpio_enable_output(LCD_BACKLIGHT_GPIO));
+	BK_LOG_ON_ERR(bk_gpio_pull_up(LCD_BACKLIGHT_GPIO));
+	bk_gpio_set_output_high(LCD_BACKLIGHT_GPIO);
+	LOGW(" CONFIG_SOC_BK7236XX LCD_TYPE_QSPI LCD_BACKLIGHT_GPIO %d \r\n", LCD_BACKLIGHT_GPIO);
 #endif
 #endif
 
-    return BK_OK;
+	return BK_OK;
 }
 
 bk_err_t lcd_driver_backlight_set(uint8_t percent)
 {
 #if CONFIG_PWM
-    pwm_period_duty_config_t config = {0};
+	pwm_period_duty_config_t config = {0};
 
-    if (percent > 100)
-    {
-        percent  = 100;
-    }
+	if (percent > 100)
+	{
+		percent = 100;
+	}
 
-    config.period_cycle = 100;
-    config.duty_cycle = percent;
+	config.period_cycle = 100;
+	config.duty_cycle = percent;
 
 #if CONFIG_SOC_BK7256XX
-    if (s_lcd.device.type == LCD_TYPE_QSPI) {
-        bk_pwm_set_period_duty(LCD_BACKLIGHT_PWM_QSPI, &config);
-    } else {
-        bk_pwm_set_period_duty(LCD_BACKLIGHT_PWM_RGB, &config);
-    }
+	if (s_lcd.device.type == LCD_TYPE_QSPI)
+	{
+		bk_pwm_set_period_duty(LCD_BACKLIGHT_PWM_QSPI, &config);
+	}
+	else
+	{
+		bk_pwm_set_period_duty(LCD_BACKLIGHT_PWM_RGB, &config);
+	}
 #elif CONFIG_SOC_BK7236XX
-    bk_pwm_set_period_duty(LCD_BACKLIGHT_PWM, &config);
+	bk_pwm_set_period_duty(LCD_BACKLIGHT_PWM, &config);
 #endif
 #endif
 
-    return BK_OK;
+	return BK_OK;
 }
 
 bk_err_t lcd_driver_backlight_close(void)
 {
 #if (CONFIG_SOC_BK7256XX)
 #if CONFIG_PWM
-    if (s_lcd.device.type == LCD_TYPE_QSPI) {
-        BK_LOG_ON_ERR(bk_pwm_stop(LCD_BACKLIGHT_PWM_QSPI));
-        BK_LOG_ON_ERR(bk_pwm_deinit(LCD_BACKLIGHT_PWM_QSPI));
-    } else {
-        BK_LOG_ON_ERR(bk_pwm_stop(LCD_BACKLIGHT_PWM_RGB));
-        BK_LOG_ON_ERR(bk_pwm_deinit(LCD_BACKLIGHT_PWM_RGB));
-    }
+	if (s_lcd.device.type == LCD_TYPE_QSPI)
+	{
+		BK_LOG_ON_ERR(bk_pwm_stop(LCD_BACKLIGHT_PWM_QSPI));
+		BK_LOG_ON_ERR(bk_pwm_deinit(LCD_BACKLIGHT_PWM_QSPI));
+	}
+	else
+	{
+		BK_LOG_ON_ERR(bk_pwm_stop(LCD_BACKLIGHT_PWM_RGB));
+		BK_LOG_ON_ERR(bk_pwm_deinit(LCD_BACKLIGHT_PWM_RGB));
+	}
 #else
-    if (s_lcd.device.type == LCD_TYPE_QSPI) {
-        BK_LOG_ON_ERR(bk_gpio_pull_down(LCD_BACKLIGHT_GPIO_QSPI));
-        bk_gpio_set_output_low(LCD_BACKLIGHT_GPIO_QSPI);
-    } else {
-        BK_LOG_ON_ERR(bk_gpio_pull_down(LCD_BACKLIGHT_GPIO_RGB));
-        bk_gpio_set_output_low(LCD_BACKLIGHT_GPIO_RGB);
-    }
+	if (s_lcd.device.type == LCD_TYPE_QSPI)
+	{
+		BK_LOG_ON_ERR(bk_gpio_pull_down(LCD_BACKLIGHT_GPIO_QSPI));
+		bk_gpio_set_output_low(LCD_BACKLIGHT_GPIO_QSPI);
+	}
+	else
+	{
+		BK_LOG_ON_ERR(bk_gpio_pull_down(LCD_BACKLIGHT_GPIO_RGB));
+		bk_gpio_set_output_low(LCD_BACKLIGHT_GPIO_RGB);
+	}
 #endif
 #elif (CONFIG_SOC_BK7236XX)
 #if CONFIG_PWM
-    BK_LOG_ON_ERR(bk_pwm_stop(LCD_BACKLIGHT_PWM));
-    BK_LOG_ON_ERR(bk_pwm_deinit(LCD_BACKLIGHT_PWM));
+	BK_LOG_ON_ERR(bk_pwm_stop(LCD_BACKLIGHT_PWM));
+	BK_LOG_ON_ERR(bk_pwm_deinit(LCD_BACKLIGHT_PWM));
 #else
-    BK_LOG_ON_ERR(bk_gpio_pull_down(LCD_BACKLIGHT_GPIO));
-    bk_gpio_set_output_low(LCD_BACKLIGHT_GPIO);
+	BK_LOG_ON_ERR(bk_gpio_pull_down(LCD_BACKLIGHT_GPIO));
+	bk_gpio_set_output_low(LCD_BACKLIGHT_GPIO);
 #endif
 #endif
 
-    return BK_OK;
+	return BK_OK;
 }
-
 
 #if (USE_LCD_REGISTER_CALLBACKS == 1)
 #if (CONFIG_SOC_BK7236XX)
@@ -479,7 +507,7 @@ __attribute__((section(".iram"))) void lcd_isr();
 __attribute__((section(".itcm_sec_code"))) void lcd_isr();
 #endif
 
-bk_err_t  bk_lcd_isr_register(lcd_int_type_t int_type, lcd_isr_t isr)
+bk_err_t bk_lcd_isr_register(lcd_int_type_t int_type, lcd_isr_t isr)
 {
 	if (int_type == I8080_OUTPUT_SOF)
 	{
@@ -507,7 +535,6 @@ bk_err_t  bk_lcd_isr_register(lcd_int_type_t int_type, lcd_isr_t isr)
 	}
 	return BK_OK;
 }
-
 
 #if (CONFIG_SOC_BK7236XX)
 __attribute__((section(".iram"))) void lcd_isr()
@@ -540,7 +567,7 @@ __attribute__((section(".itcm_sec_code"))) void lcd_isr()
 		{
 			s_lcd.lcd_rgb_de_handler();
 		}
-		//lcd_hal_soft_reset();
+		// lcd_hal_soft_reset();
 		lcd_hal_int_status_clear(DE_INT);
 	}
 	if (int_status & FRAME_INTERVAL_INT)
@@ -578,10 +605,10 @@ bk_err_t bk_lcd_isr_register(lcd_isr_t lcd_isr)
 }
 #endif
 
-
 bk_err_t bk_lcd_driver_deinit(void)
 {
-	if (!s_lcd_driver_is_init) {
+	if (!s_lcd_driver_is_init)
+	{
 		LOGE("%s, lcd already deinit. \n", __func__);
 		return BK_OK;
 	}
@@ -597,23 +624,23 @@ bk_err_t bk_lcd_driver_deinit(void)
 	return BK_OK;
 }
 
-//bk_err_t bk_lcd_8080_int_enable(bool is_sof_en, bool is_eof_en)
+// bk_err_t bk_lcd_8080_int_enable(bool is_sof_en, bool is_eof_en)
 //{
 //	lcd_hal_8080_int_enable(is_sof_en, is_eof_en);
 //	return BK_OK;
-//}
+// }
 //
-//bk_err_t  bk_lcd_rgb_int_enable(bool is_sof_en, bool is_eof_en)
+// bk_err_t  bk_lcd_rgb_int_enable(bool is_sof_en, bool is_eof_en)
 //{
 //	lcd_hal_rgb_int_enable(is_sof_en, is_eof_en);
 //	return BK_OK;
-//}
-
+// }
 
 bk_err_t bk_lcd_driver_init(lcd_clk_t clk)
 {
 	bk_err_t ret = BK_OK;
-	if (s_lcd_driver_is_init) {
+	if (s_lcd_driver_is_init)
+	{
 		LOGE("%s already init. \n", __func__);
 		return BK_OK;
 	}
@@ -638,119 +665,119 @@ bk_err_t bk_lcd_driver_init(lcd_clk_t clk)
 			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
 			break;
 #endif
-		case LCD_64M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_60M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_80M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_54M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_45M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_40M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			//ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_35M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
-			//ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_32M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_30M:
-				ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_26M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_5, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_24M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+	case LCD_64M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
 		break;
-		case LCD_22M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+	case LCD_60M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
 		break;
-		case LCD_20M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
-			//ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_17M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_15M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_12M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_10M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_5, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_9M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_8M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_7M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
-			break;
+	case LCD_80M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_54M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_45M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_40M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		// ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_35M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
+		// ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_32M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_30M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_26M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_5, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_24M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_22M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_20M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
+		// ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_17M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_15M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_12M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_10M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_5, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_9M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_8M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_7M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
+		break;
 #else
-		case LCD_80M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_54M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_60M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_32M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_30M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_40M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_26M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_22M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_20M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			//ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_17M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
-			//ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_15M:
-				ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_12M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+	case LCD_80M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
 		break;
-		case LCD_10M:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
-			//ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
-			break;
-		case LCD_8M:
-			ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
-			break;
+	case LCD_54M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_60M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_32M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_30M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_0, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_40M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_26M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_22M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_20M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		// ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_17M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
+		// ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_15M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_1, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_12M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_6, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_10M:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_1, DISP_DIV_H_7, DSIP_DISCLK_ALWAYS_ON);
+		// ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_1, DISP_DIV_H_2, DSIP_DISCLK_ALWAYS_ON);
+		break;
+	case LCD_8M:
+		ret = sys_drv_lcd_set(DISP_CLK_120M, DISP_DIV_L_0, DISP_DIV_H_3, DSIP_DISCLK_ALWAYS_ON);
+		break;
 #endif
-		default:
-			ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
-			break;
+	default:
+		ret = sys_drv_lcd_set(DISP_CLK_320M, DISP_DIV_L_0, DISP_DIV_H_4, DSIP_DISCLK_ALWAYS_ON);
+		break;
 	}
 #if (USE_LCD_REGISTER_CALLBACKS == 1)
 	bk_int_isr_register(INT_SRC_LCD, lcd_isr, NULL);
@@ -772,7 +799,7 @@ bk_err_t bk_lcd_driver_init(lcd_clk_t clk)
  *              will config with another two register x offset and y offset
  *
  * attention 2. in this sdk version width/height only set once in 8080_init,if you want set twice,should
-                set bk_lcd_8080_display_enable(0)
+				set bk_lcd_8080_display_enable(0)
  */
 bk_err_t bk_lcd_pixel_config(uint16_t x_pixel, uint16_t y_pixel)
 {
@@ -782,7 +809,6 @@ bk_err_t bk_lcd_pixel_config(uint16_t x_pixel, uint16_t y_pixel)
 	return BK_OK;
 }
 
-
 bk_err_t bk_lcd_8080_send_cmd(uint8_t param_count, uint32_t command, uint32_t *param)
 {
 	LCD_RETURN_ON_NOT_INIT();
@@ -790,9 +816,6 @@ bk_err_t bk_lcd_8080_send_cmd(uint8_t param_count, uint32_t command, uint32_t *p
 	lcd_hal_8080_cmd_send(param_count, command, param);
 	return BK_OK;
 }
-
-
-
 
 bk_err_t bk_lcd_input_pixel_hf_reverse(bool hf_reverse)
 {
@@ -808,7 +831,6 @@ bk_err_t bk_lcd_set_yuv_mode(pixel_format_t input_data_format)
 	lcd_hal_set_yuv_mode(input_data_format);
 	return BK_OK;
 }
-
 
 pixel_format_t bk_lcd_get_yuv_mode(void)
 {
@@ -873,27 +895,27 @@ bk_err_t bk_lcd_rgb_init(const lcd_device_t *device)
 	BK_RETURN_ON_NULL(device);
 
 	const lcd_rgb_t *rgb = device->rgb;
-	uint16_t x = ppi_to_pixel_x(device->ppi);  //lcd size x
-	uint16_t y = ppi_to_pixel_y(device->ppi);  //lcd size y
+	uint16_t x = ppi_to_pixel_x(device->ppi); // lcd size x
+	uint16_t y = ppi_to_pixel_y(device->ppi); // lcd size y
 	LOGI("%s\n", __func__);
 
-	lcd_hal_rgb_display_sel(1);  //RGB display enable, and select rgb module
+	lcd_hal_rgb_display_sel(1); // RGB display enable, and select rgb module
 	lcd_hal_set_sync_low(rgb->hsync_pulse_width, rgb->vsync_pulse_width);
 	lcd_hal_rgb_int_enable(0, 1);
 #if CONFIG_FLASH
 	mb_flash_register_op_notify(lcd_flash_disable_int);
 #endif
 	lcd_hal_rgb_sync_config(rgb->hsync_back_porch,
-	                        rgb->hsync_front_porch,
-	                        rgb->vsync_back_porch,
-	                        rgb->vsync_front_porch);
+							rgb->hsync_front_porch,
+							rgb->vsync_back_porch,
+							rgb->vsync_front_porch);
 
-	lcd_hal_set_rgb_clk_rev_edge(rgb->data_out_clk_edge);//output data is in clk doen edge or up adge
+	lcd_hal_set_rgb_clk_rev_edge(rgb->data_out_clk_edge); // output data is in clk doen edge or up adge
 
 	lcd_hal_disconti_mode(DISCONTINUE_MODE);
 
-	bk_lcd_pixel_config(x, y); //image xpixel ypixel
-//	bk_lcd_set_yuv_mode(device->fmt);
+	bk_lcd_pixel_config(x, y); // image xpixel ypixel
+	//	bk_lcd_set_yuv_mode(device->fmt);
 	lcd_hal_set_data_fifo_thrd(DATA_FIFO_WR_THRD, DATA_FIFO_RD_THRD);
 	return BK_OK;
 }
@@ -905,7 +927,7 @@ bk_err_t bk_lcd_8080_init(const lcd_device_t *device)
 	uint16_t x = ppi_to_pixel_x(device->ppi);
 	uint16_t y = ppi_to_pixel_y(device->ppi);
 	LOGI("%s\n", __func__);
-	lcd_hal_rgb_display_sel(0); //25bit - rgb_on = 0 select 8080 mode
+	lcd_hal_rgb_display_sel(0); // 25bit - rgb_on = 0 select 8080 mode
 	lcd_hal_disconti_mode(DISCONTINUE_MODE);
 	lcd_hal_8080_verify_1ms_count(VERIFY_1MS_COUNT);
 	lcd_hal_8080_set_tik(TIK_CNT);
@@ -913,8 +935,8 @@ bk_err_t bk_lcd_8080_init(const lcd_device_t *device)
 	lcd_hal_8080_set_fifo_data_thrd(CMD_FIFO_WR_THRD, CMD_FIFO_RD_THRD);
 	lcd_hal_pixel_config(x, y);
 	lcd_hal_8080_display_enable(1);
-	lcd_hal_8080_int_enable(0, 1); //set eof int enable
-//	bk_lcd_set_yuv_mode(config->fmt);
+	lcd_hal_8080_int_enable(0, 1); // set eof int enable
+	//	bk_lcd_set_yuv_mode(config->fmt);
 	return BK_OK;
 }
 
@@ -944,7 +966,7 @@ bk_err_t bk_lcd_8080_start_transfer(bool start)
 	return BK_OK;
 }
 
-//to del
+// to del
 bk_err_t bk_lcd_rgb_display_en(bool en)
 {
 	lcd_hal_rgb_display_en(en);
@@ -959,12 +981,14 @@ bk_err_t lcd_driver_display_disable(void)
 	if ((type == LCD_TYPE_RGB565) || (type == LCD_TYPE_RGB))
 	{
 		lcd_hal_rgb_display_en(0);
-	} else if (type == LCD_TYPE_MCU8080) {
-        lcd_hal_8080_cmd_param_count(0);
-        lcd_hal_8080_start_transfer(0);
-    }
+	}
+	else if (type == LCD_TYPE_MCU8080)
+	{
+		lcd_hal_8080_cmd_param_count(0);
+		lcd_hal_8080_start_transfer(0);
+	}
 
-    return BK_OK;
+	return BK_OK;
 }
 
 bk_err_t lcd_driver_display_enable(void)
@@ -977,20 +1001,20 @@ bk_err_t lcd_driver_display_enable(void)
 	}
 	else if (type == LCD_TYPE_MCU8080)
 	{
-		if(s_lcd.device.id == LCD_DEVICE_NT35510_MCU)
+		if (s_lcd.device.id == LCD_DEVICE_NT35510_MCU)
 		{
 			lcd_hal_8080_start_transfer(0);
-			if(s_lcd.device.mcu->set_display_area)
+			if (s_lcd.device.mcu->set_display_area)
 				s_lcd.device.mcu->set_display_area(0, 479, 0, 799);
-			if(s_lcd.device.mcu->start_transform)
+			if (s_lcd.device.mcu->start_transform)
 				s_lcd.device.mcu->start_transform();
 		}
-		else if(s_lcd.device.id == LCD_DEVICE_ST7789V)
+		else if (s_lcd.device.id == LCD_DEVICE_ST7789V)
 		{
 			lcd_hal_8080_start_transfer(0);
-			if(s_lcd.device.mcu->set_display_area)
-				s_lcd.device.mcu->set_display_area(0+35, 169+35, 0, 319); // special process
-			if(s_lcd.device.mcu->start_transform)
+			if (s_lcd.device.mcu->set_display_area)
+				s_lcd.device.mcu->set_display_area(0 + 35, 169 + 35, 0, 319); // special process
+			if (s_lcd.device.mcu->start_transform)
 				s_lcd.device.mcu->start_transform();
 		}
 		lcd_hal_8080_start_transfer(1);
@@ -1011,15 +1035,15 @@ bk_err_t lcd_driver_display_continue(void)
 	if (type == LCD_TYPE_MCU8080)
 	{
 		lcd_hal_8080_start_transfer(1);
-		if(s_lcd.device.id != LCD_DEVICE_NT35510_MCU)
+		if (s_lcd.device.id != LCD_DEVICE_NT35510_MCU)
 		{
-            lcd_hal_8080_cmd_param_count(1);
+			lcd_hal_8080_cmd_param_count(1);
 			lcd_hal_8080_write_cmd(0x3c);
 		}
 		else
 		{
 			lcd_hal_8080_start_transfer(0);
-			if(s_lcd.device.mcu->continue_transform)
+			if (s_lcd.device.mcu->continue_transform)
 				s_lcd.device.mcu->continue_transform();
 
 			lcd_hal_8080_cmd_param_count(1);
@@ -1041,7 +1065,7 @@ void lcd_driver_ppi_set(uint16_t width, uint16_t height)
 	uint16_t x = ppi_to_pixel_x(s_lcd.device.ppi);
 	uint16_t y = ppi_to_pixel_y(s_lcd.device.ppi);
 
-	//bk_lcd_set_partical_display(0, 0, 0, 0, 0);
+	// bk_lcd_set_partical_display(0, 0, 0, 0, 0);
 	lcd_hal_pixel_config(width, height);
 	uint16_t start_x = 1;
 	uint16_t start_y = 1;
@@ -1064,13 +1088,13 @@ void lcd_driver_ppi_set(uint16_t width, uint16_t height)
 		LOGD("%s, offset %d, %d, %d, %d\n", __func__, start_x, end_x, start_y, end_y);
 		bk_lcd_set_partical_display(1, start_x, end_x, start_y, end_y);
 	}
-    else if (x == width && y == height)
-    {
-        bk_lcd_set_partical_display(0, 0, 0, 0, 0);
-    }
+	else if (x == width && y == height)
+	{
+		bk_lcd_set_partical_display(0, 0, 0, 0, 0);
+	}
 	else
 	{
-        bk_lcd_set_partical_display(0, 0, 0, 0, 0);
+		bk_lcd_set_partical_display(0, 0, 0, 0, 0);
 	}
 }
 
@@ -1114,11 +1138,11 @@ bk_err_t lcd_driver_init(const lcd_device_t *device)
 	lcd_ldo_power_enable(1);
 	bk_pm_module_vote_cpu_freq(PM_DEV_ID_DISP, PM_CPU_FRQ_320M);
 #else
-    bk_pm_module_vote_ctrl_external_ldo(GPIO_CTRL_LDO_MODULE_LCD, LCD_LDO_CTRL_GPIO, GPIO_OUTPUT_STATE_HIGH);
+	bk_pm_module_vote_ctrl_external_ldo(GPIO_CTRL_LDO_MODULE_LCD, LCD_LDO_CTRL_GPIO, GPIO_OUTPUT_STATE_HIGH);
 	bk_pm_module_vote_cpu_freq(PM_DEV_ID_DISP, PM_CPU_FRQ_480M);
 #endif
 	os_memset(&s_lcd, 0, sizeof(s_lcd));
-	os_memcpy((void*)&s_lcd.device, device, sizeof(lcd_device_t));
+	os_memcpy((void *)&s_lcd.device, device, sizeof(lcd_device_t));
 
 	if ((device->type == LCD_TYPE_RGB565) || (device->type == LCD_TYPE_RGB))
 	{
@@ -1126,10 +1150,10 @@ bk_err_t lcd_driver_init(const lcd_device_t *device)
 		lcd_rgb_gpio_init();
 		bk_lcd_rgb_init(device);
 		lcd_hal_rgb_set_in_out_format(device->src_fmt, device->out_fmt);
-//		lcd_hal_int_enable(DE_INT);
+		//		lcd_hal_int_enable(DE_INT);
 
-//		lcd_hal_int_enable(FRAME_INTERVAL_INT);
-//		lcd_hal_frame_interval_config(1, VSYNC_UNIT, 2);
+		//		lcd_hal_int_enable(FRAME_INTERVAL_INT);
+		//		lcd_hal_frame_interval_config(1, VSYNC_UNIT, 2);
 	}
 	else if (device->type == LCD_TYPE_MCU8080)
 	{
@@ -1138,27 +1162,28 @@ bk_err_t lcd_driver_init(const lcd_device_t *device)
 		bk_lcd_8080_init(device);
 		lcd_hal_mcu_set_in_out_format(device->src_fmt, device->out_fmt);
 	}
-    else if (device->type == LCD_TYPE_QSPI)
-    {
-    #if CONFIG_LCD_QSPI
-        #if (CONFIG_LCD_QSPI_DEVICE_NUM > 1)
-            bk_lcd_qspi_init(LCD_QSPI_ID0, device);
-            bk_lcd_qspi_init(LCD_QSPI_ID1, device);
-        #else
-            bk_lcd_qspi_disp_open(LCD_QSPI_ID, device);
-        #endif
-    #endif
-    }
-    else if (device->type == LCD_TYPE_SPI) {
-    #if CONFIG_LCD_SPI
-        #if (CONFIG_LCD_SPI_DEVICE_NUM > 1)
-            lcd_spi_init(LCD_SPI_ID0, device);
-            lcd_spi_init(LCD_SPI_ID1, device);
-        #else
-            lcd_spi_init(LCD_SPI_ID, device);
-        #endif
-    #endif
-    }
+	else if (device->type == LCD_TYPE_QSPI)
+	{
+#if CONFIG_LCD_QSPI
+#if (CONFIG_LCD_QSPI_DEVICE_NUM > 1)
+		bk_lcd_qspi_init(LCD_QSPI_ID0, device);
+		bk_lcd_qspi_init(LCD_QSPI_ID1, device);
+#else
+		bk_lcd_qspi_disp_open(LCD_QSPI_ID, device);
+#endif
+#endif
+	}
+	else if (device->type == LCD_TYPE_SPI)
+	{
+#if CONFIG_LCD_SPI
+#if (CONFIG_LCD_SPI_DEVICE_NUM > 1)
+		lcd_spi_init(LCD_SPI_ID0, device);
+		lcd_spi_init(LCD_SPI_ID1, device);
+#else
+		lcd_spi_init(LCD_SPI_ID, device);
+#endif
+#endif
+	}
 
 	uint64_t before, after;
 #if CONFIG_ARCH_RISCV
@@ -1211,30 +1236,30 @@ bk_err_t lcd_driver_deinit(void)
 			goto out;
 		}
 	}
-    else if (s_lcd.device.type == LCD_TYPE_QSPI)
-    {
-    #if CONFIG_LCD_QSPI
-        #if (CONFIG_LCD_QSPI_DEVICE_NUM > 1)
-            bk_lcd_qspi_deinit(LCD_QSPI_ID0);
-            bk_lcd_qspi_deinit(LCD_QSPI_ID1);
-        #else
-            bk_lcd_qspi_disp_close(LCD_QSPI_ID);
-        #endif
-    #endif
-    }
-    else if (s_lcd.device.type == LCD_TYPE_SPI)
-    {
-    #if CONFIG_LCD_SPI
-        #if (CONFIG_LCD_SPI_DEVICE_NUM > 1)
-            lcd_spi_deinit(LCD_SPI_ID0);
-            lcd_spi_deinit(LCD_SPI_ID1);
-        #else
-            lcd_spi_deinit(LCD_SPI_ID);
-        #endif
-    #endif
-    }
+	else if (s_lcd.device.type == LCD_TYPE_QSPI)
+	{
+#if CONFIG_LCD_QSPI
+#if (CONFIG_LCD_QSPI_DEVICE_NUM > 1)
+		bk_lcd_qspi_deinit(LCD_QSPI_ID0);
+		bk_lcd_qspi_deinit(LCD_QSPI_ID1);
+#else
+		bk_lcd_qspi_disp_close(LCD_QSPI_ID);
+#endif
+#endif
+	}
+	else if (s_lcd.device.type == LCD_TYPE_SPI)
+	{
+#if CONFIG_LCD_SPI
+#if (CONFIG_LCD_SPI_DEVICE_NUM > 1)
+		lcd_spi_deinit(LCD_SPI_ID0);
+		lcd_spi_deinit(LCD_SPI_ID1);
+#else
+		lcd_spi_deinit(LCD_SPI_ID);
+#endif
+#endif
+	}
 
-	out:
+out:
 	bk_lcd_driver_deinit();
 	bk_pm_clock_ctrl(PM_CLK_ID_DISP, CLK_PWR_CTRL_PWR_DOWN);
 	bk_pm_module_vote_power_ctrl(PM_POWER_SUB_MODULE_NAME_VIDP_LCD, PM_POWER_MODULE_STATE_OFF);
@@ -1242,9 +1267,7 @@ bk_err_t lcd_driver_deinit(void)
 #if CONFIG_SOC_BK7256XX
 	lcd_ldo_power_enable(0);
 #else
-    bk_pm_module_vote_ctrl_external_ldo(GPIO_CTRL_LDO_MODULE_LCD, LCD_LDO_CTRL_GPIO, GPIO_OUTPUT_STATE_LOW);
+	bk_pm_module_vote_ctrl_external_ldo(GPIO_CTRL_LDO_MODULE_LCD, LCD_LDO_CTRL_GPIO, GPIO_OUTPUT_STATE_LOW);
 #endif
 	return ret;
 }
-
-
