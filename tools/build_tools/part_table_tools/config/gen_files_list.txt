@@ -1,6 +1,6 @@
-/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/vendor_flash_new.c
-/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/configuration_new.json
-/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/vendor_flash_partition.h
-/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/partitions_new.csv
 /armino/bk_avdk/bk_idk/tools/env_tools/beken_packager/partition_bk7256_ota_a_new.json
+/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/partitions_new.csv
+/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/configuration_new.json
+/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/vendor_flash_new.c
+/armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/vendor_flash_partition.h
 /armino/bk_avdk/bk_idk/tools/build_tools/part_table_tools/tempFiles/partition_bk7256_ota_a_new.json
