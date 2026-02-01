@@ -11,29 +11,29 @@
             "magic": "0x45503130",
             "name": "app",
             "flash_name": "beken_onchip_crc",
-            "offset": "0x00011000",
-            "len": "2856K"
+            "offset": "0x00012000",
+            "len": "2456K"
         },
         {
             "magic": "0x45503130",
             "name": "app1",
             "flash_name": "beken_onchip_crc",
-            "offset": "0x002db000",
-            "len": "1496K"
+            "offset": "0x00286000",
+            "len": "1096K"
         },
         {
             "magic": "0x45503130",
             "name": "app2",
             "flash_name": "beken_onchip_crc",
-            "offset": "0x00451000",
-            "len": "476K"
+            "offset": "0x003A7000",
+            "len": "276K"
         },
         {
             "magic": "0x45503130",
             "name": "download",
             "flash_name": "beken_onchip",
-            "offset": "0x004c8000",
-            "len": "3196K"
+            "offset": "0x003ED000",
+            "len": "1024K"
         }
     ]
 }
