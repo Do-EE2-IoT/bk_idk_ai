@@ -677,10 +677,11 @@ static void lcd_spi_driver_init(spi_id_t id)
     config.polarity = SPI_POLARITY_HIGH;
     config.phase = SPI_PHASE_2ND_EDGE;
     config.wire_mode = SPI_4WIRE_MODE;
-    config.baud_rate = 30000000;
+    config.baud_rate = 40000000;
     config.bit_order = SPI_MSB_FIRST;
 
 #if CONFIG_SPI_DMA
+    os_printf("Use SPI DMA \r\n");
     config.dma_mode = SPI_DMA_MODE_ENABLE;
     config.spi_tx_dma_chan = bk_dma_alloc(DMA_DEV_GSPI0);
     config.spi_rx_dma_chan = bk_dma_alloc(DMA_DEV_GSPI0_RX);
@@ -688,6 +689,7 @@ static void lcd_spi_driver_init(spi_id_t id)
     config.spi_rx_dma_width = DMA_DATA_WIDTH_8BITS;
 #else
     config.dma_mode = SPI_DMA_MODE_DISABLE;
+    os_printf("disable \r\n");
 #endif
 
     BK_LOG_ON_ERR(bk_spi_init(id, &config));
