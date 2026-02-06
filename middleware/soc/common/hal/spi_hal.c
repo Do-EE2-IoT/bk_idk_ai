@@ -21,7 +21,7 @@
 #include "sys_hal.h"
 #include "bk_misc.h"
 
-#define CONFIG_SPI_MAX_BAUD_RATE             80000000   //49M
+#define CONFIG_SPI_MAX_BAUD_RATE             49000000   //49M
 
 #if (!CONFIG_SYSTEM_CTRL)
 /* spi_clk(more than 1M) support list when source_clk = XTAL_26M
