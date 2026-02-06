@@ -691,6 +691,7 @@ static void lcd_spi_driver_init(spi_id_t id)
     config.dma_mode = SPI_DMA_MODE_DISABLE;
     os_printf("disable \r\n");
 #endif
+    // os_printf("SPI TX size %d \r\n", config.tx_size);
 
     BK_LOG_ON_ERR(bk_spi_init(id, &config));
 }
