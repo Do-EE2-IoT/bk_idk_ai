@@ -677,7 +677,7 @@ static void lcd_spi_driver_init(spi_id_t id)
     config.polarity = SPI_POLARITY_HIGH;
     config.phase = SPI_PHASE_2ND_EDGE;
     config.wire_mode = SPI_4WIRE_MODE;
-    config.baud_rate = 80000000;
+    config.baud_rate = 40000000;
     config.bit_order = SPI_MSB_FIRST;
 
 #if CONFIG_SPI_DMA
