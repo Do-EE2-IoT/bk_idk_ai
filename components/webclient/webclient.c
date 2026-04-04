@@ -41,7 +41,7 @@
 #define TAG  "http"
 
 /* default receive or send timeout */
-#define WEBCLIENT_DEFAULT_TIMEO        30
+#define WEBCLIENT_DEFAULT_TIMEO        6
 #define POST_DATA_LEN 2*1024
 
 static void bk_webclient_hex_dump(const char *s, int length)
@@ -2433,5 +2433,6 @@ int test_http(void) {
     return ret;
 }
 
-#endif
+#endif
+
 #endif
