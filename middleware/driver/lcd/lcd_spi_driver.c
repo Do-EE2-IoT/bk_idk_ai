@@ -112,7 +112,7 @@ static bool dma_is_repeat_mode = false;
 #endif
 #endif
 
-static uint8_t s_lcd_spi_flag = 1;
+static uint8_t s_lcd_spi_flag __attribute__((unused)) = 1;
 static uint8_t lcd_spi_first_disp = 1;
 #if CONFIG_LCD_SPI_TE
 static beken_semaphore_t lcd_spi_te_sem = NULL;

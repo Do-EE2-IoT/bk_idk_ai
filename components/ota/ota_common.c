@@ -252,9 +252,10 @@ int bk_ota_update_partition_flag(int input_val)
 		return BK_FAIL;
 	}
 
- 	cust_confirm_flag= 0x1;  //represent do ota update.
+	cust_confirm_flag= 0x1;  //represent do ota update.
+	uint8_t download_status_flag = 0xFF;
 #if CONFIG_OTA_EVADE_METHOD
-	uint8_t download_status_flag = DOWNLOAD_SUCCESS_FLAG;
+	download_status_flag = DOWNLOAD_SUCCESS_FLAG;
 #endif
 	OTA_LOGI("ota_exec_flag :0x%x, exec_temp_part :0x%x,cust_confirm_flag :0x%x ,download_status_flag :0x%x\r\n",\
 		ota_exec_flag ,exec_temp_part, cust_confirm_flag,download_status_flag);

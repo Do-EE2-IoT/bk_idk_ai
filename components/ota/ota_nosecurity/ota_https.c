@@ -200,7 +200,7 @@ int bk_https_ota_download(const char *url)
 		BK_LOGI(TAG, "bk_http_client_perform ok\r\n");
 
 #ifdef CONFIG_HTTP_AB_PARTITION
-	if(ota_get_dest_id() == OTA_WR_TO_FLASH)
+	if(ota_get_dest_id() == OTA_WR_TO_FLASH) {
 		int ret_val = 0;
 		#ifdef CONFIG_OTA_HASH_FUNCTION
 		ret_val= ota_do_hash_check();
@@ -211,7 +211,7 @@ int bk_https_ota_download(const char *url)
 			return  ret_val;
 		}
 		#endif
-		ret_val = bk_ota_update_partition_flag(ret);
+		ret_val = bk_ota_update_partition_flag(err);
 		if(ret_val != BK_OK)
 		{
 			ota_do_deinit_operation();
